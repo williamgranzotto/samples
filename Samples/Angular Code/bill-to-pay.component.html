@@ -1,0 +1,317 @@
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+
+
+  .contents {
+    max-width: 936px
+  }
+
+  .content {
+    display: block;
+    background-color: white;
+    padding: 20px 22px;
+    border-radius: 3px;
+    margin-top: 22px;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+  }
+
+  .myTable {
+    border-collapse: collapse;
+    width: 100%;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+  }
+
+    .myTable th, .myTable td {
+      text-align: left;
+      padding: 12px;
+    }
+
+    .myTable tr {
+      border-bottom: 1px solid #ddd;
+    }
+
+      .myTable tr.header {
+        background-color: #f1f1f1;
+        border: 1px solid #e0e0e0 !important;
+      }
+
+      .myTable tr:hover {
+        border: 0px !important;
+        border-bottom: 1px solid #ddd !important;
+      }
+
+        .myTable tr:hover .icon {
+          display: block !important;
+        }
+
+    .myTable p {
+      margin-bottom: 0px
+    }
+
+  .modal-content {
+    display: inline-block;
+    min-width: 800px !important
+  }
+
+  .myTable2 {
+    border-collapse: collapse;
+    width: 100%;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+  }
+
+    .myTable2 th, .myTable2 td {
+      text-align: left;
+      padding: 12px;
+    }
+
+    .myTable2 tr {
+      border-bottom: 1px solid #ddd;
+    }
+
+     
+</style>
+<div *ngIf="tab === 'bills-to-pay'" style="margin-top: 45px !important">
+  <div class="row">
+    <div class="col-lg-6" *ngIf="tab === 'bills-to-pay'">
+      <button (click)="newBillToPayButtonSelect()" class="btn btn-primary">Adicionar</button>
+    </div>
+
+  </div>
+  <div class="content" style="padding: 0px !important">
+    <div [hidden]="billsToPay.length == 0">
+      <div class="row" style="padding: 5px; padding-right: 15px">
+        <div class="col-lg-4 vx_form-control vx_form-control_complex">
+          <a style="cursor: pointer" class="red-text" (click)="deleteSelected('items')" [hidden]="deleteSet.size == 0">({{deleteSet.size}}) Excluir selecionados</a>
+        </div>
+        <div class="col-lg-4 vx_form-control vx_form-control_complex">
+        </div>
+        <div class="col-lg-4 vx_form-control vx_form-control_complex" style="padding-right: 8px">
+          <input autocomplete="off" [(ngModel)]="filter" type="text" name="search" placeholder="Pesquisar" class="form-control input" style="width: calc(100% - 15px)" />
+          <span class="btn blue-search-btn" style="cursor: default">
+            <fa-icon [icon]="faSearch"></fa-icon>
+          </span>
+        </div>
+      </div>
+
+      <div class="row" style="overflow-x: scroll; margin-left: 0px; margin-right: 0px;margin-top: 25px">
+        <div class="col-lg-12 vx_form-control vx_form-control_complex" style="padding-left: 0px; padding-right: 0px">
+
+          <table id="myTable" class="myTable" style="border-left: 0px; border-right: 0px;">
+            <tr class="header">
+              <th><input type="checkbox" (change)="selectAll($event)" /></th>
+              <th>Vencimento</th>
+              <th>Categoria</th>
+              <th>Descrição/Fornecedor</th>
+              <th>Quantia</th>
+              <th>Valor pago</th>
+              <th>Data pagamento</th>
+              <th>Status</th>
+              <th>...</th>
+            </tr>
+            <tr *ngFor="let item of billsToPay | filter: filter | paginate: { itemsPerPage: 10, currentPage: p }; let i = index" style="width: 100%; cursor: pointer">
+              <td>
+                <input class="cbs" type="checkbox" (change)="changeCheckbox($event, item.id)" />
+              </td>
+              <td>
+                {{dateService.millisToDate(item.dueDate)}}
+              </td>
+              <td>
+                {{item.billCategory != null ? item.billCategory.description : null}}
+              </td>
+              <td>
+                {{item.description != "" ? item.description + (item.supplier != null ? "/" + item.supplier.name: ""): (item.supplier != null ? item.supplier.name: "")}}
+              </td>
+              <td>
+                {{currencyService.formatNumber(item.amount)}}
+              </td>
+              <td>
+                {{currencyService.formatNumber(item.paidAmount)}}
+              </td>
+              <td>
+                {{item.paymentDate != null ? dateService.millisToDate(item.paymentDate) : ''}}
+              </td>
+              <td>
+                {{translateService.translateStr(item.status)}}
+              </td>
+              <td>
+                <button class="btn btn-secondary" (click)="openBillToPay(item)">Atualizar</button>
+              </td>
+            </tr>
+          </table>
+
+        </div>
+
+      </div>
+      <div class="row" style="padding: 5px; padding-right: 15px">
+
+        <div class="col-lg-6 vx_form-control vx_form-control_complex">
+        </div>
+        <div class="col-lg-6 vx_form-control vx_form-control_complex">
+          <pagination-controls (pageChange)="p = $event" style="float: right"
+                               directionLinks="true"
+                               responsive="true"
+                               previousLabel="Anterior"
+                               nextLabel="Próximo"
+                               screenReaderPaginationLabel="Paginação"
+                               screenReaderPageLabel="página"
+                               screenReaderCurrentLabel="Você está na página"></pagination-controls>
+        </div>
+      </div>
+    </div>
+    <div [hidden]="billsToPay.length > 0" class="col-lg-12 vx_form-control vx_form-control_complex" style="padding-bottom: 25px; padding-top: 25px">
+      Nenhum registro
+    </div>
+  </div>
+</div>
+
+<ng-template #newBillToPay let-modal>
+  <div class="modal-header">
+    <h4 class="modal-title" id="modal-basic-title">Nova conta</h4>
+    <button type="button" class="close" aria-label="Close" (click)="closeModalButtonSelect()">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  <div class="modal-body">
+    <form id="PageMainForm" class="signupAppContent" method="POST" [formGroup]="billsToPayForm">
+      <div style=" border: 1px solid rgba(0, 0, 0, 0.2); border-radius: 2px; margin: 0px; margin-bottom: 15px;">
+        <div class="modal-header" style="margin-bottom: 10px; background-color: #f1f1f1"><b>Dados principais</b></div>
+        <div style="padding: 15px">
+          <div class="row" style="margin-bottom: 25px">
+            <div class="col-lg-4 vx_form-control vx_form-control_complex">
+              <label>Categoria</label>
+              <div class="tooltip" style="color: #212529">
+                <fa-icon [icon]="faInfoCircle"></fa-icon>
+                <span class="tooltiptext">Clique duas vezes para expandir o menu</span>
+              </div>
+
+              <ejs-dropdownlist [value]='value' #sample1 (open)='onOpen()' (close)="onClose()" [placeholder]="categoryPlaceholder">
+                <ng-template #noRecordsTemplate>
+                  <div id='tree'></div>
+                </ng-template>
+              </ejs-dropdownlist>
+
+            </div>
+            <div class="col-lg-4 vx_form-control vx_form-control_complex">
+              <label>Vencimento<span class="required-sign">*</span></label>
+              <input required formControlName="dueDate" class="form-control" type="date" />
+            </div>
+            <div class="col-lg-4 vx_form-control vx_form-control_complex">
+              <label>Fornecedor</label>
+              <ng-autocomplete id="supplier" [(ngModel)]="selected" class="custom-autocomplete-container"
+                               [data]="data"
+                               [searchKeyword]="keyword"
+                               (selected)='selectEvent($event)'
+                               placeHolder="Procurar categoria"
+                               [itemTemplate]="itemTemplate"
+                               [notFoundTemplate]="notFoundTemplate">
+              </ng-autocomplete>
+
+              <ng-template #itemTemplate let-item>
+                <a [innerHTML]="(item.code != undefined ? item.code : '') + (item.code && item.name != undefined ? ' - ' : '') + (item.name != undefined ? item.name : '')"></a>
+              </ng-template>
+
+              <ng-template #notFoundTemplate let-notFound>
+                <div [innerHTML]="notFound"></div>
+              </ng-template>
+            </div>
+          </div>
+          <div class="row" style="margin-bottom: 25px">
+
+            <div class="col-lg-4 vx_form-control vx_form-control_complex">
+              <label>Valor<span class="required-sign">*</span></label>
+              <input required formControlName="amount" class="form-control" type="text" [brmasker]="{money: true, thousand: '.',  decimalCaracter: ','}" />
+            </div>
+            <div class="col-lg-8 vx_form-control vx_form-control_complex">
+              <label>Descrição</label>
+              <input formControlName="description" type="text" value="" class="form-control" />
+            </div>
+          </div>
+
+          <!--<div class="row" style="margin-top: 25px">
+
+     <div class="col-lg-8 vx_form-control vx_form-control_complex">
+       <input type="checkbox" [checked]="keepFields" (change)="keepFields = !keepFields"/>
+       Manter os campos Categoria e Fornecedor ao clicar em 'Salvar e novo'
+     </div>
+   </div>
+      -->
+        </div>
+      </div>
+      <div style="border: 1px solid rgba(0, 0, 0, 0.2); border-radius: 2px; margin: 0px; margin-top: 25px; margin-bottom: 25px;">
+        <div class="modal-header" style="margin-bottom: 10px; background-color: #f1f1f1"><b>Repetir esta conta</b></div>
+        <div style="padding: 15px">
+          <div class="row">
+
+            <div class="col-lg-4 vx_form-control vx_form-control_complex">
+              <label>Número de repetições<span class="required-sign">*</span></label>
+              <input required formControlName="repetitionQuantity" type="number" class="form-control" value="1" />
+            </div>
+            <div class="col-lg-3 vx_form-control vx_form-control_complex">
+              <label>Frequência<span class="required-sign">*</span></label>
+              <select required formControlName="repetitionFrequency" class="form-control">
+                <option value="Mensal">Mensal</option>
+                <option value="Diário">Diário</option>
+                <option value="Semanal">Semanal</option>
+                <option value="Bimestral">Bimestral</option>
+                <option value="Trimestral">Trimestral</option>
+                <option value="Anual">Anual</option>
+              </select>
+            </div>
+            <!--<div class="col-lg-4 vx_form-control vx_form-control_complex">
+
+    <button class="btn btn-secondary" style="margin-top: 32px">Criar repetições</button>
+  </div>-->
+          </div>
+          <div class="row" >
+
+            <div class="col-lg-12">
+
+            </div>
+
+          </div>
+        </div>
+          </div>
+          <div style="border: 1px solid rgba(0, 0, 0, 0.2); border-radius: 2px; margin: 0px; margin-top: 25px; margin-bottom: 25px;">
+            <div class="modal-header" style="margin-bottom: 10px; background-color: #f1f1f1">
+              <div>
+                <input type="checkbox" [checked]="paid" (change)="paid = !paid" />
+                <b style="margin-left: 5px">{{isRepetitionQuantityValueOne() ? 'Conta  paga' : 'Entrada'}}</b>
+              </div>
+            </div>
+            <div style="padding: 15px" [hidden]="!paid">
+              <div class="row">
+                <div class="col-lg-3 vx_form-control vx_form-control_complex">
+                  <label>Pago em</label>
+                  <input formControlName="paymentDate" class="form-control" type="date" />
+                </div>
+                <div class="col-lg-3 vx_form-control vx_form-control_complex">
+                  <label>Descontos</label>
+                  <input formControlName="discount" class="form-control" type="text" [brmasker]="{money: true, thousand: '.',  decimalCaracter: ','}" />
+                </div>
+                <div class="col-lg-3 vx_form-control vx_form-control_complex">
+                  <label>Juros/Multa</label>
+                  <input formControlName="interestAndFines" class="form-control" type="text" [brmasker]="{money: true, thousand: '.',  decimalCaracter: ','}" />
+                </div>
+                <div class="col-lg-3 vx_form-control vx_form-control_complex">
+                  <label>Valor pago</label>
+                  <input formControlName="paidAmount" class="form-control" type="text" [brmasker]="{money: true, thousand: '.',  decimalCaracter: ','}" />
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="row" style="margin-top: 25px">
+            <div class="col-lg-12 vx_form-control vx_form-control_complex">
+              <button class="btn btn-primary" style="float: right; margin-left: 15px"
+                      type="submit" (click)="saveBill()">
+                Salvar
+              </button>
+
+            </div>
+          </div>
+
+</form>
+  </div>
+</ng-template>

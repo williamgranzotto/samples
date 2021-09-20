@@ -1,0 +1,867 @@
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  
+ 
+
+  .content{
+    display: block;
+    background-color: white;
+    padding:20px 22px;border-radius: 3px; margin-top: 22px;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    }
+
+  .myTable {
+    border-collapse: collapse;
+    width: 100%;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+  }
+
+    .myTable th, .myTable td {
+      text-align: left;
+      padding: 12px;
+    }
+
+    .myTable tr {
+      border-bottom: 1px solid #ddd;
+    }
+
+      .myTable tr.header {
+        background-color: #f1f1f1;
+      }
+
+      .myTable tr:hover {
+        
+      }
+
+      .myTable tr:hover .icon {
+        display: block !important;
+      }
+
+      .myTable p{
+        margin-bottom: 0px
+      }
+
+      .modal-content {
+  display: inline-block;
+  min-width: 800px !important
+}
+
+      .myTable2 {
+    border-collapse: collapse;
+    width: 100%;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+  }
+
+    .myTable2 th, .myTable2 td {
+      text-align: left;
+      padding: 12px;
+    }
+
+    .myTable2 tr {
+      border-bottom: 1px solid #ddd;
+    }
+
+      .myTable2 tr.header, .myTable tr:hover {
+        background-color: #fefed8;
+      }
+
+
+      
+</style>
+<section class="mainContents row transfer " id="transfer" style="margin-top: 45px !important">
+  <div id="react-transfer-container" style="width: 100%; padding:22px">
+    <div class="react-p2p_wrapper">
+      <div class="white-header">
+        <a href="/orders?tab=opened" class="{{tab === 'opened' ? 'active' : ''}}">Pedidos em aberto</a>
+        <a href="/orders?tab=today" class="{{tab === 'today' ? 'active' : ''}}">Pedidos do dia</a>
+        <a href="/orders?tab=tables" class="{{tab === 'tables' ? 'active' : ''}}">Mesas</a>
+
+      </div>
+
+      <div class="row">
+        <div class="col-lg-6" *ngIf="tab === 'opened'">
+          <button (click)=" newOrderButtonSelected()" class="btn btn-primary">Adicionar</button>
+          <button (click)=" newOrderButtonSelectedDelivery()" class="btn btn-primary" style="margin-left: 4px">
+            <fa-icon [icon]="faWhatsapp" class="text-muted px-3" style="color: white !important; padding-left: 0px !important; padding-right: 0px !important"></fa-icon>
+          Whatsapp</button>
+        </div>
+
+      </div>
+
+
+      <div class="content" style="padding: 0px !important">
+        <div *ngIf="tab === 'opened'">
+          <div [hidden]="map.size == 0 && map2.size == 0">
+            <div class="row" style="padding: 5px; padding-right: 15px">
+              <div class="col-lg-4 vx_form-control vx_form-control_complex">
+              </div>
+              <div class="col-lg-4 vx_form-control vx_form-control_complex">
+              </div>
+              <div class="col-lg-4 vx_form-control vx_form-control_complex" style="padding-right: 8px">
+                <input autocomplete="off" [(ngModel)]="filter" type="text" name="search" placeholder="Pesquisar" class="form-control input" style="width: calc(100%); margin-bottom: 10px" />
+                <span class="btn blue-search-btn" style="cursor: default; right: 5px" >
+                  <fa-icon [icon]="faSearch"></fa-icon>
+                </span>
+              </div>
+            </div>
+
+
+            <div class="tab2" style="border-top: 1px dashed #ccc;background: #ffffff; padding-top: 8px; border-bottom: 0px; border-right: 0; border-left: 0">
+              <div style="float: right">
+                <button [class]="!inventory? 'subnav2 active2' : 'subnav2'" (click)="openTab2($event, 'normalOrders'); inventory = false" style="padding: 14px 16px; padding-top: 8px; cursor: pointer; text-decoration: none">Pedidos</button>
+                <button [class]="inventory? 'subnav2 active2' : 'subnav2'" (click)="openTab2($event, 'deliveryOrders'); inventory = true" style="padding: 14px 16px; padding-top: 8px; cursor: pointer; text-decoration: none">Pedidos no delivery</button>
+              </div>
+            </div>
+
+            <div id="normalOrders" class="tabcontent" style="margin-top: -1px; background: #ffffff; border-right: 0; border-left: 0">
+              <div class="row" style="margin-left: 0px; margin-right: 0px;margin-top: 25px">
+
+                <div style="padding: 10px" class="col-lg-2 vx_form-control vx_form-control_complex" *ngFor="let item of map | keyvalue : returnZero | filter: filter | paginate: { itemsPerPage: 10, currentPage: p }; let i = index">
+                  <div style="border: 1px solid #ccc; border-radius: 4px; padding: 10px">
+                    <div>
+                      {{i + 1}}
+                    </div>
+                    <div>
+                      {{item.key.split("<::>")[0].split("<:>")[1]}}<br />
+                      {{item.key.split("<::>")[0].split("<:>")[3]}}
+                    </div>
+                    <div>
+                      {{item.key.split("<::>")[0].split("<:>")[8] == false ? item.key.split("<::>")[1] : ''}}
+                    </div>
+
+                    <div>{{currencyService.formatNumber(totalCostMap.get(item.key))}}</div>
+                    <!--<div>
+      <fa-icon title="Atualizar" (click)="open(newOrder);selectOrder(item.value, item.key)" class="icon" [icon]="faExternalLinkSquareAlt" style="color: #ffbc0d; float: right; margin-right: 15px; display: none"></fa-icon>
+      <fa-icon title="Imprimir" (click)="printOrder(item.key, item.value, item.key)" class="icon" [icon]="faPrint" style="color: #ffbc0d; float: right; margin-right: 15px; display: none"></fa-icon>
+    </div>-->
+
+                  </div>
+                </div>
+
+              </div>
+            </div>
+            <div id="deliveryOrders" class="tabcontent" style="margin-top: -1px; background: #ffffff; border-right: 0; border-left: 0">
+              <div class="row" style="margin-left: 0px; margin-right: 0px;margin-top: 25px">
+
+                  <div style="padding: 10px" class="col-lg-2 vx_form-control vx_form-control_complex" *ngFor="let item of map2 | keyvalue : returnZero | filter: filter | paginate: { itemsPerPage: 10, currentPage: p }; let i = index">
+                    <div (click)="selectDeliveryOrder(item.key)" style="color: white; border-radius: 4px; padding: 10px; cursor: pointer" [style]="'background:' + item.value[0]._color">
+                      <div>
+                        <span style="font-weight: bold; color: white">{{i + 1}}</span>
+                      </div>
+                    <div>
+                      <span style="font-weight: bold; color: white">{{item.key.split("<::>")[0].split("<:>")[1]}}</span><br />
+                      {{item.key.split("<::>")[0].split("<:>")[3]}}
+                    </div>
+                    <div>
+                      {{item.key.split("<::>")[0].split("<:>")[8] == false ? item.key.split("<::>")[1] : ''}}
+                    </div>
+
+                    <div>{{currencyService.formatNumber(totalCostMap.get(item.key))}}</div>
+                    <!--<div>
+            <fa-icon title="Atualizar" (click)="open(newOrder);selectOrder(item.value, item.key)" class="icon" [icon]="faExternalLinkSquareAlt" style="color: #ffbc0d; float: right; margin-right: 15px; display: none"></fa-icon>
+            <fa-icon title="Imprimir" (click)="printOrder(item.key, item.value, item.key)" class="icon" [icon]="faPrint" style="color: #ffbc0d; float: right; margin-right: 15px; display: none"></fa-icon>
+          </div>-->
+
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+
+
+
+          </div>
+            <div [hidden]="map.size > 0 || map2.size > 0" class="col-lg-12 vx_form-control vx_form-control_complex" style="padding-bottom: 25px; padding-top: 25px">
+              Nenhum registro
+            </div>
+          </div>
+        <div *ngIf="tab === 'today'">
+          <div [hidden]="list.length == 0">
+            <div class="row" style="padding: 5px; padding-right: 15px">
+              <div class="col-lg-4 vx_form-control vx_form-control_complex">
+              </div>
+              <div class="col-lg-4 vx_form-control vx_form-control_complex">
+              </div>
+              <div class="col-lg-4 vx_form-control vx_form-control_complex" style="padding-right: 8px">
+                <input autocomplete="off" [(ngModel)]="filter" type="text" name="search" placeholder="Pesquisar" class="form-control input" style="width: calc(100% - 15px)" />
+                <span class="btn blue-search-btn" style="cursor: default">
+                  <fa-icon [icon]="faSearch"></fa-icon>
+                </span>
+              </div>
+            </div>
+            <div class="row" style="overflow-x: scroll; margin-left: 0px; margin-right: 0px;margin-top: 25px">
+              <div class="col-lg-12 vx_form-control vx_form-control_complex" style="padding-left: 0px; padding-right: 0px">
+
+                <table id="myTable2" class="myTable" style="border-left: 0px; border-right: 0px;">
+                  <tr class="header">
+                    <th style="width:5%; padding-left: 25px">Nº</th>
+                    <th style="width:30%;">Cliente</th>
+                    <th style="width:10%;">Mesa</th>
+                    <th style="width:30%;">Pratos</th>
+                    <th style="width:25%;">Bebidas</th>
+                  </tr>
+                  <tr *ngFor="let item of list | filter: filter | paginate: { itemsPerPage: 10, currentPage: p }; let i = index" style="width: 100%">
+                    <td style="padding-left: 25px">{{item.orderNumber}}</td>
+                    <td>
+                      <b>Nome</b>: {{item.customer.name}}<br />
+                      <b>Bairro</b>: {{item.customer.addresses[0].district}}<br />
+                      <b>Endereço</b>: {{item.address}}
+                    </td>
+                    <td>
+                      {{item.tableCode}}
+                    </td>
+                    <td>
+                      <p *ngFor="let foodInformation of item.foodInformations; let i = index">
+                        <span [hidden]="foodInformation.food.foodType != 'FOOD'"><b>{{ '(' + foodInformation.quantity + ') '}}</b></span><span>{{foodInformation.food.foodType == 'FOOD' ? foodInformation.food.name : ''}}</span>
+                      </p>
+                    </td>
+                    <td>
+                      <p *ngFor="let foodInformation of item.foodInformations; let i = index">
+                        <span [hidden]="foodInformation.food.foodType != 'DRINK'"><b>{{ '(' + foodInformation.quantity + ') '}}</b></span><span>{{foodInformation.food.foodType == 'DRINK' ? foodInformation.food.name : ''}}</span>
+                      </p>
+                    </td>
+                  </tr>
+                </table>
+
+              </div>
+            </div>
+
+            <div class="row" style="padding: 5px; padding-right: 15px">
+
+              <div class="col-lg-6 vx_form-control vx_form-control_complex">
+              </div>
+              <div class="col-lg-6 vx_form-control vx_form-control_complex">
+                <pagination-controls (pageChange)="p = $event" style="float: right"
+                                     directionLinks="true"
+                                     responsive="true"
+                                     previousLabel="Anterior"
+                                     nextLabel="Próximo"
+                                     screenReaderPaginationLabel="Paginação"
+                                     screenReaderPageLabel="página"
+                                     screenReaderCurrentLabel="Você está na página"></pagination-controls>
+              </div>
+            </div>
+          </div>
+          <div [hidden]="list.length > 0" class="col-lg-12 vx_form-control vx_form-control_complex" style="padding-bottom: 25px; padding-top: 25px">
+            Nenhum registro
+          </div>
+        </div>
+
+        <div *ngIf="tab === 'tables'">
+
+          <div class="row" style="padding: 1rem" [hidden]="data.length == 0">
+
+            <div class="col-lg-2" *ngFor="let table of data" style="margin-bottom: 15px">
+              <button [class]="table.status == 'FREE' ? 'btn btn-primary' : table.status == 'OCCUPIED' ? 'btn btn-danger' : 'btn btn-dark'" (click)="changeTableStatus(table)">{{table.code}}</button>
+            </div>
+
+          </div>
+
+          <div [hidden]="data.length > 0" class="col-lg-12 vx_form-control vx_form-control_complex" style="padding-bottom: 25px; padding-top: 25px">
+            Nenhum registro
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+
+
+  <ng-template #newOrder let-modal>
+    <div class="modal-header">
+      <h4 class="modal-title" id="modal-basic-title">Pedido</h4>
+      <button type="button" class="close" aria-label="Close" (click)="closeModalButtonSelect()">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    <div class="modal-body">
+      <form id="newOrderForm" class="signupAppContent" method="POST">
+        <div class="row" style="margin-bottom: 25px; margin-top: 0 !important">
+          <div class="col-lg-4 vx_form-control vx_form-control_complex">
+            <label>Mesa</label>
+            <ng-autocomplete id="table" required class="custom-autocomplete-container"
+                             [initialValue]="selected"
+                             [(ngModel)]="selected" placeHolder="Procurar mesa" [data]="data"
+                             [searchKeyword]="keyword"
+                             (selected)='update ? mockSelectEvent($event) : selectEvent($event)'
+                             [itemTemplate]="itemTemplate"
+                             [notFoundTemplate]="notFoundTemplate"
+                             style="{{update? 'pointer-events: none' : ''}}">
+            </ng-autocomplete>
+
+            <ng-template #itemTemplate let-item>
+              <a [innerHTML]="(item.code != undefined ? item.code : '') + (item.code && item.name != undefined ? ' - ' : '') + (item.name != undefined ? item.name : '')"></a>
+            </ng-template>
+
+            <ng-template #notFoundTemplate let-notFound>
+              <div [innerHTML]="notFound"></div>
+            </ng-template>
+          </div>
+          <div class="col-lg-5 vx_form-control vx_form-control_complex">
+            <label>Cliente</label>
+            <ng-autocomplete id="customer" required class="custom-autocomplete-container"
+                             [initialValue]="customerSelected"
+                             [(ngModel)]="customerSelected" placeHolder="Procurar cliente" [data]="customerData"
+                             [searchKeyword]="customerKeyword"
+                             (selected)='update ? customerMockSelectEvent($event) : customerSelectEvent($event)'
+                             [itemTemplate]="itemTemplate"
+                             [notFoundTemplate]="notFoundTemplate"
+                             style="{{update? 'pointer-events: none' : ''}}">
+            </ng-autocomplete>
+
+            <ng-template #itemTemplate let-item>
+              <a [innerHTML]="(item.code != undefined ? item.code : '') + (item.code && item.name != undefined ? ' - ' : '') + (item.name != undefined ? item.name : '')"></a>
+            </ng-template>
+
+            <ng-template #notFoundTemplate let-notFound>
+              <div [innerHTML]="notFound"></div>
+            </ng-template>
+          </div>
+          <div class="col-lg-3 vx_form-control vx_form-control_complex">
+
+            <button class="btn btn-primary" (click)="openCustomers()" style="margin-top: 35px">Novo Cliente</button>
+
+          </div>
+
+        </div>
+        <div class="row" [hidden]="hiddenCustomerForm">
+          <form style="width: 100%; margin-left: 25px; margin-right: 25px" [formGroup]="customersForm" class="signupAppContent" method="POST">
+
+            <div style=" border: 1px solid rgba(0, 0, 0, 0.2); border-radius: 2px; margin: 0px; margin-bottom: 15px;">
+              <div class="modal-header" style="margin-bottom: 10px; background-color: #f1f1f1"><b>Dados Principais do Cliente</b></div>
+              <div style="padding: 15px">
+
+                <div class="row">
+                  <div class="col-lg-4 vx_form-control vx_form-control_complex">
+                    <label>Código</label>
+                    <input readonly formControlName="code" type="text" class="form-control input" />
+                  </div>
+                  <div class="col-lg-8 vx_form-control vx_form-control_complex">
+                    <label>Nome<span class="required-sign">*</span></label>
+                    <input type="text"  formControlName="name" class="form-control input" />
+                  </div>
+                  
+                </div>
+
+                <div class="row">
+                  <div class="col-lg-4 vx_form-control vx_form-control_complex">
+                    <label>Fone principal</label>
+                    <input type="text" formControlName="phone" class="form-control input" [brmasker]="{phone: true}" />
+                  </div>
+                  <div class="col-lg-4 vx_form-control vx_form-control_complex">
+                    <label>Celular</label>
+                    <input type="text" formControlName="cellphone" class="form-control input" [brmasker]="{phone: true}" />
+                  </div>
+                </div>
+
+              </div>
+            </div>
+            <div style=" border: 1px solid rgba(0, 0, 0, 0.2); border-radius: 2px; margin: 0px; margin-bottom: 15px;">
+              <div class="modal-header" style="margin-bottom: 10px; background-color: #f1f1f1"><b>Endereço Principal do Cliente</b></div>
+              <div style="padding: 15px">
+
+                <div class="row">
+
+                  <div class="col-lg-8 vx_form-control vx_form-control_complex">
+                    <label>Endereço</label>
+                    <input type="text" formControlName="address" class="form-control input" />
+                  </div>
+                  <div class="col-lg-4 vx_form-control vx_form-control_complex">
+                    <label>Número</label>
+                    <input type="text" formControlName="number" class="form-control input" style="padding-top: 7px; padding-bottom: 7px" />
+                  </div>
+                  
+                </div>
+                <div class="row">
+                  <div class="col-lg-4 vx_form-control vx_form-control_complex">
+                    <label>Bairro</label>
+                    <input type="text" formControlName="district" class="form-control input" />
+                  </div>
+                  <div class="col-lg-4 vx_form-control vx_form-control_complex">
+                    <label>Complemento</label>
+                    <input type="text" formControlName="complement" class="form-control input" />
+                  </div>
+                  <div class="col-lg-4 vx_form-control vx_form-control_complex">
+                    <label>Referência</label>
+                    <input type="text" formControlName="reference" class="form-control input" />
+                  </div>
+                  <!--<div class="col-lg-6 vx_form-control vx_form-control_complex">
+    <a href="#">Visualizar no mapa</a>
+  </div>
+      -->
+                </div>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-md-12">
+
+                <button type="submit" (click)="saveCustomer(false)" class="btn btn-primary" style="float: right; margin-left: 5px">Salvar</button>
+                <button type="button" (click)="hiddenCustomerForm = true" class="btn btn-secondary" style="float: right;">Cancelar</button>
+
+              </div>
+            </div>
+          </form>
+
+        </div>
+        <div class="row">
+          <div class="col-lg-12 vx_form-control vx_form-control_complex" style="overflow-x: auto; ">
+
+            <table class="myTable2" style="min-height: 200px">
+              <tr class="header">
+                <th style="width: 30%; padding-top: 0 !important; padding-bottom: 0 !important">Pratos e bebidas</th>
+                <th style="width: 20%; padding-top: 0 !important; padding-bottom: 0 !important">Quantidade</th>
+                <th style="width: 20%; padding-top: 0 !important; padding-bottom: 0 !important">Custo</th>
+                <th style="width: 10%; padding-top: 0 !important; padding-bottom: 0 !important">Opções</th>
+              </tr>
+              <tr *ngFor="let foodInformation of foodInformations; let i = index" style="vertical-align: top">
+                <td style="margin-right: 10px">
+                  <div>
+                    <ng-autocomplete required id="product{{i}}"
+                                     [initialValue]="foodInformation.food"
+                                     class="custom-autocomplete-container"
+                                     placeHolder="Procurar produto" [data]="itemData"
+                                     [searchKeyword]="itemKeyword"
+                                     (selected)='changeFoodFisrtDialog($event, i)'
+                                     [itemTemplate]="itemTemplate"
+                                     [notFoundTemplate]="notFoundTemplate">
+                    </ng-autocomplete>
+
+                    <ng-template #itemTemplate let-item>
+                      <a [innerHTML]="(item.code != undefined ? item.code : '') + (item.code && item.name != undefined ? ' - ' : '') + (item.name != undefined ? item.name : '')"></a>
+                    </ng-template>
+
+                    <ng-template #notFoundTemplate let-notFound>
+                      <div [innerHTML]="notFound"></div>
+                    </ng-template>
+                  </div>
+                </td>
+                <td>
+                  <input required id="quantity{{i}}" min="1" (change)="calcFirstDialog($event, i)" type="number" value="{{foodInformation.quantity}}" class="form-control" />
+                </td>
+                <td>
+                  <input required id="cost{{i}}" type="text" value="" class="form-control" readonly />
+                </td>
+                <!--<td>
+                  <input id="paid{{i}}" type="checkbox" class="input" style="display: block; margin-left: auto; margin-right: auto" />
+                </td>-->
+
+                <td>
+                  <div class="row">
+                    <div class="col-lg-6">
+                      <a style="cursor: pointer" (click)="removeFoodInformationFirstDialog(i)">
+                        <fa-icon [icon]="faMinusCircle"></fa-icon>
+                      </a>
+                    </div>
+                    <div class="col-lg-6">
+                      <a style="cursor: pointer" [hidden]="i != foodInformations.length - 1" (click)="addFoodInformationFirstDialog()">
+                        <fa-icon [icon]="faPlusCircle"></fa-icon>
+                      </a>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            </table>
+          </div>
+        </div>
+        <div class="row" style="margin-top: 25px">
+          <div class="col-lg-4 vx_form-control vx_form-control_complex">
+            <label>Tipo de pagamento</label>
+            <select id="orderPaymentType" class="form-control">
+              <option value="CARD">Cartão</option>
+              <option value="CASH">Dinheiro</option>
+              <option value="PIX">PIX</option>
+            </select>
+          </div>
+          <div class="col-lg-8 vx_form-control vx_form-control_complex">
+            <label>Observações</label>
+            <textarea id="obs" class="form-control">
+
+</textarea>
+          </div>
+        </div>
+        <div class="row" style="margin-top: 25px">
+          <div class="col-lg-9 vx_form-control vx_form-control_complex">
+          </div>
+          <div class="col-lg-3 vx_form-control vx_form-control_complex">
+            <div style="float: right">
+              <span>Total: </span>
+              <b>
+                R$<span id="order-total" type="text">0,00</span>
+              </b>
+            </div>
+          </div>
+        </div>
+        <div class="row" style="margin-top: 25px">
+          <div class="col-lg-12 vx_form-control vx_form-control_complex">
+            <button class="btn btn-secondary" style="float: right; margin-left: 15px" (click)="notifyConfirm(table != undefined ? table.code : deliveryTable.code)" [hidden]="!update">Fechar conta</button>
+            <button class="btn btn-primary" style="float: right" (click)="presentAlertConfirmOrder()">{{update ? add ? 'Adicionar pedido' : 'Atualizar pedido' : 'Realizar pedido'}}</button>
+
+          </div>
+        </div>
+      </form>
+    </div>
+  </ng-template>
+
+  <ng-template #newOrderDelivery let-modal>
+    <div class="modal-header" style="padding-top: 5px;padding-bottom: 5px;">
+      <h4 class="modal-title" id="modal-basic-title">Whatsapp</h4>
+      <button type="button" class="close" aria-label="Close" (click)="closeModalButtonSelect()">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    <div class="modal-body" style="height: 100% !important">
+      <div class="row" style="margin-top: 0 !important; height: 100% !important">
+        <div class="col-lg-8 vx_form-control vx_form-control_complex" style="margin-top: -30px !important">
+          <app-whatsapp (newItemEvent)="selectCustomer($event)"></app-whatsapp>
+        </div>
+        <div class="col-lg-4 vx_form-control vx_form-control_complex" style="margin-top: -15px !important">
+          <form class="signupAppContent" method="POST">
+            <div class="w3-bar w3-black" style="margin-top: 5px; margin-left: -15px; display: flex">
+              <button id="order-btn" style="margin-right: 4px; padding-top: 5px; padding-bottom: 5px;" class="w3-bar-item w3-button active" (click)="openTab('order')" onclick="document.getElementById('register-btn').classList.remove('active'); document.getElementById('orders-btn').classList.remove('active'); document.getElementById('order-btn').classList.add('active'); document.getElementById('orderPaymentType').style.display = 'block'; document.getElementById('showSendMessageButton').style.display = 'block'">Pedido</button>
+              <button [hidden]="customerSelected == null" id="register-btn" style="margin-right: 4px; padding-top: 5px; padding-bottom: 5px;" class="w3-bar-item w3-button" (click)="openTab('register')" onclick="document.getElementById('orders-btn').classList.remove('active'); document.getElementById('order-btn').classList.remove('active'); document.getElementById('register-btn').classList.add('active'); document.getElementById('orderPaymentType').style.display = 'none'; document.getElementById('showSendMessageButton').style.display = 'none'">Cadastro</button>
+              <button [hidden]="customerSelected == null" style="padding-top: 5px; padding-bottom: 5px;" id="orders-btn" class="w3-bar-item w3-button" (click)="openTab('orders')" onclick="document.getElementById('order-btn').classList.remove('active'); document.getElementById('register-btn').classList.remove('active'); document.getElementById('orders-btn').classList.add('active'); document.getElementById('orderPaymentType').style.display = 'none'; document.getElementById('showSendMessageButton').style.display = 'none'">Pedidos do cliente</button>
+
+
+            </div>
+            <div class="row w3-container tab" id="orders" style="margin-top: -1px !important; display: none">
+              <div class="row" style="line-height: normal !important; width: 100%; overflow-y: scroll; height: 400px">
+
+                <table style="width: 100%; margin-left: 15px">
+
+                  <tr style="vertical-align: inherit !important">
+                    <th>Nome</th>
+                    <th>Quantidade</th>
+                    <th>Data</th>
+
+                  </tr>
+
+                  <tr style="vertical-align: inherit !important" *ngFor="let foodInformation of selectedCustomerFoodInformations" class="col-lg-12 vx_form-control vx_form-control_complex">
+                    <td>{{foodInformation.food.name}}</td>
+                    <td>{{foodInformation.quantity}}</td>
+                    <td>{{dateService.millisToDate(foodInformation.date)}}</td>
+                  </tr>
+
+                </table>
+
+              </div>
+            </div>
+                <div class="row w3-container tab" id="register" style="margin-top: -1px !important; display: none">
+                  <form style="width: 100%; margin-left: 0px; margin-right: 15px" [formGroup]="customersFormDelivery" i class="signupAppContent" method="POST">
+
+                    <div style=" border: 1px solid rgba(0, 0, 0, 0.2); border-radius: 2px; margin: 0px; margin-bottom: 15px;">
+
+                      <div style="padding: 15px">
+
+                        <div class="row" style="line-height: normal !important">
+                          <div class="col-lg-4 vx_form-control vx_form-control_complex">
+                            <label>Código</label>
+                            <input readonly formControlName="code" type="text" class="form-control input" />
+                          </div>
+                          <div class="col-lg-8 vx_form-control vx_form-control_complex">
+                            <label>Celular</label>
+                            <input type="text" formControlName="cellphone" class="form-control input" [brmasker]="{phone: true}" />
+                          </div>
+
+                        </div>
+                        <div class="row" style="line-height: normal !important">
+                          <div class="col-lg-12 vx_form-control vx_form-control_complex">
+                            <label>Nome<span class="required-sign">*</span></label>
+                            <input id="w-name-input" required type="text" formControlName="name" class="form-control input" />
+                          </div>
+                        </div>
+
+
+                        <div class="row" style="line-height: normal !important">
+
+                          <div class="col-lg-12 vx_form-control vx_form-control_complex">
+                            <label>Endereço</label>
+                            <div class="tooltip" style="color: #212529">
+                              <fa-icon [icon]="faInfoCircle"></fa-icon>
+                              <span class="tooltiptext">Especifique sua cidade e seu estado em Configurações para preencimento automático do endereço e bairro</span>
+                            </div>
+                            <input type="text" formControlName="address" class="form-control input" (keyup)="getAddresses()" />
+                          </div>
+                        </div>
+                        <div [style]="cepAddresses == null || cepAddresses == undefined || cepAddresses.length == 0 ? 'display: none' : ''" class="row" style="line-height: normal !important; max-height: 150px; overflow-y: scroll; position: absolute; z-index: 9; background: white; width: calc(100% - 48px); margin-left: 0px; padding: 5px; border: 1px solid rgb(206, 212, 218); border-radius: 4px; border-top-left-radius: 0; border-top-right-radius: 0; margin-top: 0px !important">
+                          <div *ngFor="let address of cepAddresses; let i = index" class="col-lg-12 vx_form-control vx_form-control_complex">
+                            <div class="cep-address" (click)="setAddress(address)" style="cursor: pointer">{{address.logradouro + ' - ' + address.bairro}}</div>
+                          </div>
+
+                        </div>
+                        <div class="row" style="line-height: normal !important">
+                          <div class="col-lg-4 vx_form-control vx_form-control_complex">
+                            <label>Número</label>
+                            <input type="text" formControlName="number" class="form-control input" style="padding-top: 7px; padding-bottom: 7px" />
+                          </div>
+                          <div class="col-lg-8 vx_form-control vx_form-control_complex">
+                            <label>Bairro</label>
+                            <input type="text" formControlName="district" class="form-control input" />
+                          </div>
+                        </div>
+                        <div class="row" style="line-height: normal !important">
+
+                          <div class="col-lg-6 vx_form-control vx_form-control_complex">
+                            <label>Complemento</label>
+                            <input type="text" formControlName="complement" class="form-control input" />
+                          </div>
+                          <div class="col-lg-6 vx_form-control vx_form-control_complex">
+                            <label>Referência</label>
+                            <input type="text" formControlName="reference" class="form-control input" />
+                          </div>
+                          <!--<div class="col-lg-6 vx_form-control vx_form-control_complex">
+      <a href="#">Visualizar no mapa</a>
+    </div>
+        -->
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="row" style="line-height: normal !important">
+                      <div class="col-md-12">
+
+                        <button type="submit" (click)="saveCustomerDelivery()" class="btn btn-primary" style="float: right; margin-left: 5px">Salvar</button>
+
+                      </div>
+                    </div>
+                  </form>
+
+                </div>
+                <div id="order" class="row w3-container tab" style=" width: calc(100% + 15px); border-top: 1px solid rgba(0, 0, 0, 0.2); margin-top: -1px !important; padding-top: 15px">
+                  <div class="row" style="margin-top: 0px !important; margin-bottom: 10px">
+                    <div class="col-lg-12 vx_form-control vx_form-control_complex" style="overflow-x: auto; ">
+
+                      <table class="myTable2">
+                        <tr class="header">
+                          <th style="width: 100%; padding-top: 5px; padding-bottom: 5px">Pratos e bebidas</th>
+                          <th style="min-width: 55px !important; padding-top: 5px; padding-bottom: 5px">Qtde.</th>
+
+                          <th style="padding-top: 5px; padding-bottom: 5px">...</th>
+                        </tr>
+                        <tr>
+                          <td style="margin-right: 10px; padding-top: 0px; padding-bottom: 0px">
+                            <input id="product" placeholder="Pressione a tecla de espaço..." required type="text" class="form-control" (keyup)="openNewFood($event)" />
+                          </td>
+                          <!--                    <td style="margin-right: 10px">
+            <div>
+              <ng-autocomplete required id="product{{i}}"
+                               [initialValue]="foodInformation.food"
+                               class="custom-autocomplete-container"
+                               placeHolder="Procurar produto" [data]="itemData"
+                               [searchKeyword]="itemKeyword"
+                               (selected)='changeFood($event, i)'
+                               [itemTemplate]="itemTemplate"
+                               [notFoundTemplate]="notFoundTemplate">
+              </ng-autocomplete>
+
+              <ng-template #itemTemplate let-item>
+                <a [innerHTML]="(item.code != undefined ? item.code : '') + (item.code && item.name != undefined ? ' - ' : '') + (item.name != undefined ? item.name : '')"></a>
+              </ng-template>
+
+              <ng-template #notFoundTemplate let-notFound>
+                <div [innerHTML]="notFound"></div>
+              </ng-template>
+            </div>
+          </td>-->
+                          <td>
+                            <input style="min-width: 60px; padding-top: 0px; padding-bottom: 0px" required id="quantity" min="1" (change)="calc($event, i)" type="number" value="1" class="form-control" />
+                          </td>
+                          <!--<td>
+            <input id="paid{{i}}" type="checkbox" class="input" style="display: block; margin-left: auto; margin-right: auto" />
+          </td>-->
+
+                          <td style="padding-top: 0px; padding-bottom: 0px">
+                            <div class="row" style="margin-top: 0px !important">
+                              <div class="col-lg-12">
+
+                                <a style="cursor: pointer" (click)="addFoodInformation()">
+                                  <fa-icon [icon]="faPlusCircle"></fa-icon>
+                                </a><br />
+
+                              </div>
+                            </div>
+                          </td>
+                        </tr>
+                      </table>
+                    </div>
+                  </div>
+
+                  <div style="width: 100%; border-bottom: 1px solid rgb(206, 212, 218); padding-bottom: 5px; margin-bottom: 5px; max-height: 75px !important; overflow-y: auto">
+                    <div class="row" *ngFor="let foodInformation of foodInformations; let i = index" style="width: calc(100% + 14px); margin-top: 0px !important; font-size: 11pt !important">
+                      <div class="col-lg-7 vx_form-control vx_form-control_complex food-name">
+                        {{foodInformation.food.name + (foodInformation.cut ? ' (CORTADO)' : '')}}<i>{{ ' ' + (foodInformationsNotes[i] != undefined ? foodInformationsNotes[i] : '')}}</i>
+                      </div>
+                      <div class="col-lg-1 vx_form-control vx_form-control_complex food-quantity">
+                        {{foodInformation.quantity}}
+                      </div>
+                      <div class="col-lg-2 vx_form-control vx_form-control_complex food-price" style="text-align: right">
+                        {{currencyService.formatNumber(foodInformation.price)}}
+                      </div>
+                      <div class="col-lg-2 vx_form-control vx_form-control_complex" style="padding-right: 0">
+                        <fa-icon [icon]="faMinusCircle" style="cursor: pointer; margin-left: 5px;float: right" (click)="remove(i)"></fa-icon>
+                        <fa-icon [icon]="faStickyNote" style="cursor: pointer; margin-left: 5px;float: right" (click)="note(foodInformation)"></fa-icon>
+                        <fa-icon [icon]="faHandScissors" style="cursor: pointer; float: right" (click)="cut(foodInformation)"></fa-icon>
+
+                      </div>
+                      <div class="row" style="position: absolute; z-index: 9; normal !important; min-width: calc(100% - 15px); margin-left: 0 !important; padding-right: 0; background: #e6e9f2; margin-left: 15px !important; padding-top: 15px; padding-bottom: 15px; border: 1px solid rgba(0, 0, 0, 0.2); margin-top: 27px !important" [hidden]="!foodInformation.showNote">
+
+                        <div class="col-lg-9 vx_form-control vx_form-control_complex">
+                          <label>Descrição do produto</label>
+                          <textarea [id]="'selectedFoodInformationNote' + i" [value]="selectedFoodInformationNote" class="form-control input"></textarea>
+                        </div>
+                        <div class="col-lg-3 vx_form-control vx_form-control_complex">
+                          <button class="btn btn-primary" (click)="saveNote(i)" style="float: right; position: absolute; bottom: 0">Aplicar</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="row" style="margin-top: 0px !important; width: calc(100% + 30px)">
+
+                    <div class="col-lg-4 vx_form-control vx_form-control_complex">
+                      Serviços: <input value="0,00" (blur)="calcOrderTotal()" id="services" class="form-control input" [brmasker]="{money: true, thousand: '.',  decimalCaracter: ','}" />
+                      <fa-icon [icon]="servicesIcon" style="cursor: pointer; right: 25px;
+    position: absolute;
+    top: 30px;" (click)="changeServicesIcon()"></fa-icon>
+                    </div>
+                    <div class="col-lg-4 vx_form-control vx_form-control_complex">
+                      Descontos: <input value="0,00" (blur)="calcOrderTotal()" id="discounts" class="form-control input" [brmasker]="{money: true, thousand: '.',  decimalCaracter: ','}" />
+                      <fa-icon [icon]="discountsIcon" style="cursor: pointer; right: 25px;
+    position: absolute;
+    top: 30px;" (click)="changeDiscountsIcon()"></fa-icon>
+                    </div>
+                    <div class="col-lg-4 vx_form-control vx_form-control_complex">
+                      Troco: <input id="change" value="0,00" (blur)="calcOrderTotal()" class="form-control input" [brmasker]="{money: true, thousand: '.',  decimalCaracter: ','}" />
+                    </div>
+                  </div>
+                  <div class="row" style="margin-top: 10px !important; width: calc(100% + 30px); font-size: 11pt">
+
+                    <div class="col-lg-12 vx_form-control vx_form-control_complex">
+                      <div style="float: right">
+                        <span>Total dos produtos: </span>
+                        <b>
+                          R$<span id="products-total" type="text"> 0,00</span>
+                        </b>
+                      </div>
+                    </div>
+                    <div class="col-lg-12 vx_form-control vx_form-control_complex">
+                      <div style="float: right">
+                        <span>Total dos serviços: </span>
+                        <b>
+                          R$<span id="services-total" type="text"> 0,00</span>
+                        </b>
+                      </div>
+                    </div>
+                    <div class="col-lg-12 vx_form-control vx_form-control_complex">
+                      <div style="float: right">
+                        <span>Total dos descontos: </span>
+                        <b>
+                          R$<span id="discounts-total" type="text"> 0,00</span>
+                        </b>
+                      </div>
+                    </div>
+                    <div class="col-lg-12 vx_form-control vx_form-control_complex">
+                      <div style="float: right">
+                        <span>Total: </span>
+                        <b>
+                          R$<span id="order-total" type="text"> 0,00</span>
+                        </b>
+                      </div>
+                    </div>
+                    <div class="col-lg-12 vx_form-control vx_form-control_complex">
+                      <div style="float: right">
+                        <span>Troco: </span>
+                        <b>
+                          R$<span id="_change" type="text"> 0,00</span>
+                        </b>
+                      </div>
+                    </div>
+                  </div>
+                  
+                
+
+
+
+
+
+                  <div style="position: absolute; bottom: 0; width: calc(100% - 15px)">
+                    <div class="row" style="margin-top: 25px; width: calc(100% + 30px)">
+                      <div class="col-lg-6 vx_form-control vx_form-control_complex">
+
+                        
+
+                        <select id="orderPaymentType" class="form-control" (change)="cache()">
+                          <option selected disabled>Tipo de pagamento</option>
+                          <option value="CARD">Cartão</option>
+                          <option value="CASH">Dinheiro</option>
+                          <option value="PIX">PIX</option>
+                        </select>
+                      </div>
+                      <div class="col-lg-6 vx_form-control vx_form-control_complex">
+
+                        <textarea id="obs" (blur)="cache()" class="form-control" placeholder="Observação..." style="height: 80px"></textarea>
+                      </div>
+                    </div>
+
+                    <div class="row" style="margin-top: 25px; width: calc(100% + 30px)">
+                      <div class="col-lg-12 vx_form-control vx_form-control_complex">
+                        <button class="btn btn-secondary" style="float: right; margin-left: 15px" (click)="notifyConfirm(table != undefined ? table.code : deliveryTable.code)" [hidden]="!update">Fechar conta</button>
+                        <button class="btn btn-primary" style="float: right" (click)="presentAlertConfirmOrderDelivery()">{{update ? add ? 'Adicionar pedido' : 'Atualizar pedido' : 'Finalizar pedido'}}</button>
+
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                    <div class="row w3-container tab" id="foods" style="margin-top: -1px !important; display: none">
+                      <div class="modal-header" style="width: calc(100% - 15px)">
+                        <h6 class="modal-title" id="modal-basic-title">Selecione um prato ou bebida</h6>
+                        <button type="button" class="close" aria-label="Close" (click)="closeFoodsAndDrinks()()">
+                          <span aria-hidden="true">&times;</span>
+                        </button>
+                      </div>
+                      <div class="modal-body">
+                        <div style=" border: 1px solid rgba(0, 0, 0, 0.2); border-radius: 2px; margin: 0px; margin-bottom: 15px;">
+
+                          <div style="padding: 15px">
+                            <div class="row" style="margin-top: 0 !important; margin-bottom: 10px">
+                              <div class="col-lg-12 vx_form-control vx_form-control_complex">
+
+                                <input type="text" class="form-control" id="searchFoodFilter" name="searchFoodFilter" [(ngModel)]="searchFoodFilter"/>
+                                <fa-icon [icon]="faSearch" style="position: absolute; right: 25px; top: 5px; color: rgba(0, 0, 0, 0.6)"></fa-icon>
+                                
+                              </div>
+                            </div>
+
+                            <div class="row" style="margin-top: 0 !important">
+                              <div class="col-lg-12 vx_form-control vx_form-control_complex">
+
+                                <table>
+
+                                  <tr *ngFor="let food of itemData | filter:searchFoodFilter; let i = index" (click)="selectFood(food)" style="cursor: pointer !important">
+                                    <td (click)="selectFood(food)">{{food.name}}</td>
+                                  </tr>
+
+                                </table>
+
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+</form>
+        </div>
+      </div>
+    </div>
+  </ng-template>
+
+
+</section>
+
+

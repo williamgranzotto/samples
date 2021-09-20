@@ -1,0 +1,1189 @@
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  * {
+    box-sizing: border-box;
+  }
+
+  .myInput {
+    background-image: url('/css/searchicon.png');
+    background-position: 10px 10px;
+    background-repeat: no-repeat;
+    width: 100%;
+    border-radius: 5px;
+    padding: 12px 20px 12px 40px;
+    border: 1px solid #9da3a6;
+    margin-top: 70px;
+  }
+
+  .contents {
+    max-width: 936px
+  }
+
+  .content {
+    display: block;
+    background-color: white;
+    padding: 20px 22px;
+    border-radius: 3px;
+    margin-top: 22px;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+  }
+
+  
+</style>
+<section class="mainContents row transfer " id="transfer">
+  <div id="react-transfer-container" style="width: 100%; padding:22px">
+    <div class="react-p2p_wrapper">
+      <div class="white-header">
+        <a href="/registrations?tab=items" class="{{tab === 'items' ? 'active' : ''}}">Pratos e bebidas</a>
+        <a href="/registrations?tab=item-categories" class="{{tab === 'item-categories' ? 'active' : ''}}">Categorias</a>
+        <a href="/registrations?tab=tables" class="{{tab === 'tables' ? 'active' : ''}}">Mesas</a>
+        <a href="/registrations?tab=users" class="{{tab === 'users' ? 'active' : ''}}">Usuários</a>
+        <a href="/registrations?tab=suppliers" class="{{tab === 'suppliers' ? 'active' : ''}}">Fornecedores</a>
+        <a href="/registrations?tab=customers" class="{{tab === 'customers' ? 'active' : ''}}">Clientes</a>
+      </div>
+
+      <!--<div style="margin-top: 70px; width: 310px">
+    <ng-autocomplete class="custom-autocomplete-container" [(ngModel)]="selected" placeHolder="Procurar" [data]="data"
+                     [searchKeyword]="keyword"
+                     (selected)='selectEvent($event)'
+                     [itemTemplate]="itemTemplate"
+                     [notFoundTemplate]="notFoundTemplate">
+    </ng-autocomplete>
+
+    <ng-template #itemTemplate let-item>
+      <a [innerHTML]="(item.code != undefined ? item.code : '') + (item.code && item.name != undefined ? ' - ' : '') + (item.name != undefined ? item.name : '')"></a>
+    </ng-template>
+
+    <ng-template #notFoundTemplate let-notFound>
+      <div [innerHTML]="notFound"></div>
+    </ng-template>
+  </div>-->
+
+      <div class="row" style="padding-top: 30px">
+        <div class="col-lg-6" *ngIf="tab === 'items'">
+          <button (click)="openFoodsAndDrinks(null)" class="btn btn-primary">Adicionar</button>
+        </div>
+        <div class="col-lg-6" *ngIf="tab === 'item-categories'">
+          <button (click)="openItemCategories(null)" class="btn btn-primary">Adicionar</button>
+        </div>
+        <div class="col-lg-6" *ngIf="tab === 'tables'">
+          <button (click)="openTables(null)" class="btn btn-primary">Adicionar</button>
+        </div>
+        <div class="col-lg-6" *ngIf="tab === 'users'">
+          <button (click)="openUsers(null)" class="btn btn-primary">Adicionar</button>
+        </div>
+        <div class="col-lg-6" *ngIf="tab === 'suppliers'">
+          <button (click)="openSuppliers(null)" class="btn btn-primary">Adicionar</button>
+        </div>
+        <div class="col-lg-6" *ngIf="tab === 'customers'">
+          <button (click)="openCustomers(null)" class="btn btn-primary">Adicionar</button>
+        </div>
+      </div>
+
+      <div class="content" *ngIf="tab === 'items'" style="padding: 0px !important">
+        <div [hidden]="data.length == 0">
+          <div class="row" style="padding: 5px; padding-right: 15px">
+            <div class="col-lg-4 vx_form-control vx_form-control_complex">
+              <a style="cursor: pointer" class="red-text" (click)="deleteSelected('items')" [hidden]="deleteSet.size == 0">({{deleteSet.size}}) Excluir selecionados</a>
+            </div>
+            <div class="col-lg-4 vx_form-control vx_form-control_complex">
+            </div>
+            <div class="col-lg-4 vx_form-control vx_form-control_complex" style="padding-right: 8px">
+              <input autocomplete="off" [(ngModel)]="filter" type="text" name="search" placeholder="Pesquisar" class="form-control input" style="width: calc(100% - 15px)" />
+              <span class="btn blue-search-btn" style="cursor: default">
+                <fa-icon [icon]="faSearch"></fa-icon>
+              </span>
+            </div>
+          </div>
+
+          <div class="row" style="overflow-x: scroll; margin-left: 0px; margin-right: 0px;margin-top: 25px">
+            <div class="col-lg-12 vx_form-control vx_form-control_complex" style="padding-left: 0px; padding-right: 0px">
+              <table id="myTable" class="myTable" style="border-left: 0px; border-right: 0px;">
+                <tr class="header">
+                  <th><input type="checkbox" (change)="selectAll($event)" /></th>
+                  <th>Code</th>
+                  <th>Nome</th>
+                  <th>Tipo</th>
+                  <th>Categoria</th>
+                  <th>Preço</th>
+                  <th>Qtd. padrão</th>
+                  <th>Ativo</th>
+                  <th style="width: 15%"></th>
+                </tr>
+                <tr *ngFor="let item of data | filter: filter | paginate: { itemsPerPage: 10, currentPage: p }; let i = index" style="width: 100%; cursor: pointer">
+                  <td>
+                    <input class="cbs" type="checkbox" (change)="changeCheckbox($event, item.id)" />
+                  </td>
+                  <td>
+                    {{item.code}}
+                  </td>
+                  <td>
+                    {{item.name}}
+                  </td>
+                  <td>
+                    {{translateService.translateStr(item.foodType)}}
+                  </td>
+                  <td>
+                    {{item.foodCategory != null ? item.foodCategory.name : ''}}
+                  </td>
+                  <td>
+                    {{currencyService.formatNumber(item.price)}}
+                  </td>
+                  <td>
+                    {{item.defaultQuantity}}
+                  </td>
+                  <td>
+                    {{item.active ? 'ATIVO': 'INATIVO'}}
+                  </td>
+                  <td>
+
+                    <button class="btn btn-secondary" (click)="openFoodsAndDrinks(item)">Atualizar</button>
+
+                  </td>
+                </tr>
+              </table>
+
+            </div>
+
+          </div>
+          <div class="row" style="padding: 5px; padding-right: 15px">
+
+            <div class="col-lg-6 vx_form-control vx_form-control_complex">
+            </div>
+            <div class="col-lg-6 vx_form-control vx_form-control_complex">
+              <pagination-controls (pageChange)="p = $event" style="float: right"
+                                   directionLinks="true"
+                                   responsive="true"
+                                   previousLabel="Anterior"
+                                   nextLabel="Próximo"
+                                   screenReaderPaginationLabel="Paginação"
+                                   screenReaderPageLabel="página"
+                                   screenReaderCurrentLabel="Você está na página"></pagination-controls>
+            </div>
+          </div>
+        </div>
+        <div [hidden]="data.length > 0" class="col-lg-12 vx_form-control vx_form-control_complex" style="padding-bottom: 25px; padding-top: 25px">
+          Nenhum registro
+        </div>
+      </div>
+
+      <div class="content" *ngIf="tab === 'item-categories'" style="padding: 0px !important">
+        <div [hidden]="data.length == 0">
+          <div class="row" style="padding: 5px; padding-right: 15px">
+            <div class="col-lg-4 vx_form-control vx_form-control_complex">
+              <a style="cursor: pointer" class="red-text" (click)="deleteSelected('item-categories')" [hidden]="deleteSet.size == 0">({{deleteSet.size}}) Excluir selecionados</a>
+            </div>
+            <div class="col-lg-4 vx_form-control vx_form-control_complex">
+            </div>
+            <div class="col-lg-4 vx_form-control vx_form-control_complex" style="padding-right: 8px">
+              <input autocomplete="off" [(ngModel)]="filter" type="text" name="search" placeholder="Pesquisar" class="form-control input" style="width: calc(100% - 15px)" />
+              <span class="btn blue-search-btn" style="cursor: default">
+                <fa-icon [icon]="faSearch"></fa-icon>
+              </span>
+            </div>
+          </div>
+
+          <div class="row" style="overflow-x: scroll; margin-left: 0px; margin-right: 0px;margin-top: 25px">
+            <div class="col-lg-12 vx_form-control vx_form-control_complex" style="padding-left: 0px; padding-right: 0px">
+              <table id="myTable" class="myTable" style="border-left: 0px; border-right: 0px;">
+                <tr class="header">
+                  <th><input type="checkbox" (change)="selectAll($event)" /></th>
+                  <th>Code</th>
+                  <th>Nome</th>
+                  <th style="width: 15%"></th>
+                </tr>
+                <tr *ngFor="let item of data | filter: filter | paginate: { itemsPerPage: 10, currentPage: p }; let i = index" style="width: 100%; cursor: pointer">
+                  <td>
+                    <input class="cbs" type="checkbox" (change)="changeCheckbox($event, item.id)" />
+                  </td>
+                  <td>
+                    {{item.code}}
+                  </td>
+                  <td>
+                    {{item.name}}
+                  </td>
+                  <td>
+                    <button class="btn btn-secondary" (click)="openItemCategories(item)">Atualizar</button>
+                  </td>
+                </tr>
+              </table>
+
+            </div>
+
+          </div>
+          <div class="row" style="padding: 5px; padding-right: 15px">
+
+            <div class="col-lg-6 vx_form-control vx_form-control_complex">
+            </div>
+            <div class="col-lg-6 vx_form-control vx_form-control_complex">
+              <pagination-controls (pageChange)="p = $event" style="float: right"
+                                   directionLinks="true"
+                                   responsive="true"
+                                   previousLabel="Anterior"
+                                   nextLabel="Próximo"
+                                   screenReaderPaginationLabel="Paginação"
+                                   screenReaderPageLabel="página"
+                                   screenReaderCurrentLabel="Você está na página"></pagination-controls>
+            </div>
+          </div>
+        </div>
+        <div [hidden]="data.length > 0" class="col-lg-12 vx_form-control vx_form-control_complex" style="padding-bottom: 25px; padding-top: 25px">
+          Nenhum registro
+        </div>
+      </div>
+
+      <div class="content" *ngIf="tab === 'tables'" style="padding: 0px !important">
+        <div [hidden]="data.length == 0">
+          <div class="row" style="padding: 5px; padding-right: 15px">
+            <div class="col-lg-4 vx_form-control vx_form-control_complex">
+              <a style="cursor: pointer" class="red-text" (click)="deleteSelected('tables')" [hidden]="deleteSet.size == 0">({{deleteSet.size}}) Excluir selecionados</a>
+            </div>
+            <div class="col-lg-4 vx_form-control vx_form-control_complex">
+            </div>
+            <div class="col-lg-4 vx_form-control vx_form-control_complex" style="padding-right: 8px">
+              <input autocomplete="off" [(ngModel)]="filter" type="text" name="search" placeholder="Pesquisar" class="form-control input" style="width: calc(100% - 15px)" />
+              <span class="btn blue-search-btn" style="cursor: default">
+                <fa-icon [icon]="faSearch"></fa-icon>
+              </span>
+            </div>
+          </div>
+
+          <div class="row" style="overflow-x: scroll; margin-left: 0px; margin-right: 0px;margin-top: 25px">
+            <div class="col-lg-12 vx_form-control vx_form-control_complex" style="padding-left: 0px; padding-right: 0px">
+              <table id="myTable" class="myTable" style="border-left: 0px; border-right: 0px;">
+                <tr class="header">
+                  <th><input type="checkbox" (change)="selectAll($event)" /></th>
+                  <th>Code</th>
+                  <th style="width: 15%"></th>
+                </tr>
+                <tr *ngFor="let item of data | filter: filter | paginate: { itemsPerPage: 10, currentPage: p }; let i = index" style="width: 100%; cursor: pointer">
+                  <td>
+                    <input class="cbs" type="checkbox" (change)="changeCheckbox($event, item.id)" />
+                  </td>
+                  <td>
+                    {{item.code}}
+                  </td>
+                  <td>
+                    <button class="btn btn-secondary" (click)="openTables(item)">Atualizar</button>
+                  </td>
+                </tr>
+              </table>
+
+            </div>
+
+          </div>
+          <div class="row" style="padding: 5px; padding-right: 15px">
+
+            <div class="col-lg-6 vx_form-control vx_form-control_complex">
+            </div>
+            <div class="col-lg-6 vx_form-control vx_form-control_complex">
+              <pagination-controls (pageChange)="p = $event" style="float: right"
+                                   directionLinks="true"
+                                   responsive="true"
+                                   previousLabel="Anterior"
+                                   nextLabel="Próximo"
+                                   screenReaderPaginationLabel="Paginação"
+                                   screenReaderPageLabel="página"
+                                   screenReaderCurrentLabel="Você está na página"></pagination-controls>
+            </div>
+          </div>
+        </div>
+        <div [hidden]="data.length > 0" class="col-lg-12 vx_form-control vx_form-control_complex" style="padding-bottom: 25px; padding-top: 25px">
+          Nenhum registro
+        </div>
+      </div>
+
+      <div class="content" *ngIf="tab === 'users'" style="padding: 0px !important">
+        <div [hidden]="data.length == 0">
+          <div class="row" style="padding: 5px; padding-right: 15px">
+            <div class="col-lg-4 vx_form-control vx_form-control_complex">
+              <a style="cursor: pointer" class="red-text" (click)="deleteSelected('users')" [hidden]="deleteSet.size == 0">({{deleteSet.size}}) Excluir selecionados</a>
+            </div>
+            <div class="col-lg-4 vx_form-control vx_form-control_complex">
+            </div>
+            <div class="col-lg-4 vx_form-control vx_form-control_complex" style="padding-right: 8px">
+              <input autocomplete="off" [(ngModel)]="filter" type="text" name="search" placeholder="Pesquisar" class="form-control input" style="width: calc(100% - 15px)" />
+              <span class="btn blue-search-btn" style="cursor: default">
+                <fa-icon [icon]="faSearch"></fa-icon>
+              </span>
+            </div>
+          </div>
+
+          <div class="row" style="overflow-x: scroll; margin-left: 0px; margin-right: 0px;margin-top: 25px">
+            <div class="col-lg-12 vx_form-control vx_form-control_complex" style="padding-left: 0px; padding-right: 0px">
+              <table id="myTable" class="myTable" style="border-left: 0px; border-right: 0px;">
+                <tr class="header">
+                  <th><input type="checkbox" (change)="selectAll($event)" /></th>
+                  <th>Nome</th>
+                  <th>Apelido</th>
+                  <th>E-mail</th>
+                  <th>Ativo</th>
+                  <th>Tipo</th>
+                  <th style="width: 15%"></th>
+                </tr>
+                <tr *ngFor="let item of data | filter: filter | paginate: { itemsPerPage: 10, currentPage: p }; let i = index" style="width: 100%; cursor: pointer">
+                  <td>
+                    <input class="cbs" type="checkbox" (change)="changeCheckbox($event, item.id)" />
+                  </td>
+                  <td>
+                    {{item.name}}
+                  </td>
+                  <td>
+                    {{item.nickname}}
+                  </td>
+                  <td>
+                    {{item.email}}
+                  </td>
+                  <td>
+                    {{item.active ? 'Sim' : 'Não'}}
+                  </td>
+                  <td>
+                    {{translateService.translateStr(item.userType)}}
+                  </td>
+                  <td>
+                    <button class="btn btn-secondary" (click)="openUsers(item)">Atualizar</button>
+                  </td>
+                </tr>
+              </table>
+
+            </div>
+
+          </div>
+          <div class="row" style="padding: 5px; padding-right: 15px">
+
+            <div class="col-lg-6 vx_form-control vx_form-control_complex">
+            </div>
+            <div class="col-lg-6 vx_form-control vx_form-control_complex">
+              <pagination-controls (pageChange)="p = $event" style="float: right"
+                                   directionLinks="true"
+                                   responsive="true"
+                                   previousLabel="Anterior"
+                                   nextLabel="Próximo"
+                                   screenReaderPaginationLabel="Paginação"
+                                   screenReaderPageLabel="página"
+                                   screenReaderCurrentLabel="Você está na página"></pagination-controls>
+            </div>
+          </div>
+        </div>
+        <div [hidden]="data.length > 0" class="col-lg-12 vx_form-control vx_form-control_complex" style="padding-bottom: 25px; padding-top: 25px">
+          Nenhum registro
+        </div>
+      </div>
+
+      <div class="content" *ngIf="tab === 'suppliers'" style="padding: 0px !important">
+        <div [hidden]="data.length == 0">
+          <div class="row" style="padding: 5px; padding-right: 15px">
+            <div class="col-lg-4 vx_form-control vx_form-control_complex">
+              <a style="cursor: pointer" class="red-text" (click)="deleteSelected('suppliers')" [hidden]="deleteSet.size == 0">({{deleteSet.size}}) Excluir selecionados</a>
+            </div>
+            <div class="col-lg-4 vx_form-control vx_form-control_complex">
+            </div>
+            <div class="col-lg-4 vx_form-control vx_form-control_complex" style="padding-right: 8px">
+              <input autocomplete="off" [(ngModel)]="filter" type="text" name="search" placeholder="Pesquisar" class="form-control input" style="width: calc(100% - 15px)" />
+              <span class="btn blue-search-btn" style="cursor: default">
+                <fa-icon [icon]="faSearch"></fa-icon>
+              </span>
+            </div>
+          </div>
+
+          <div class="row" style="overflow-x: scroll; margin-left: 0px; margin-right: 0px;margin-top: 25px">
+            <div class="col-lg-12 vx_form-control vx_form-control_complex" style="padding-left: 0px; padding-right: 0px">
+              <table id="myTable" class="myTable" style="border-left: 0px; border-right: 0px;">
+                <tr class="header">
+                  <th><input type="checkbox" (change)="selectAll($event)" /></th>
+                  <th>Code</th>
+                  <th>Nome</th>
+                  <th>Endereço</th>
+                  <th>CEP</th>
+                  <th>Pessoa para contato</th>
+                  <th>Celular</th>
+                  <th>E-mail</th>
+                  <th style="width: 15%"></th>
+                </tr>
+                <tr *ngFor="let item of data | filter: filter | paginate: { itemsPerPage: 10, currentPage: p }; let i = index" style="width: 100%; cursor: pointer">
+                  <td>
+                    <input class="cbs" type="checkbox" (change)="changeCheckbox($event, item.id)" />
+                  </td>
+                  <td>
+                    {{item.code}}
+                  </td>
+                  <td>
+                    {{item.name}}
+                  </td>
+                  <td>
+                    {{item.address}}
+                  </td>
+                  <td>
+                    {{item.postalCode}}
+                  </td>
+                  <td>
+                    {{item.contactPersonName}}
+                  </td>
+                  <td>
+                    {{item.phone}}
+                  </td>
+                  <td>
+                    {{item.email}}
+                  </td>
+                  <td>
+                    <button class="btn btn-secondary" (click)="openSuppliers(item)">Atualizar</button>
+                  </td>
+                </tr>
+              </table>
+
+            </div>
+
+          </div>
+          <div class="row" style="padding: 5px; padding-right: 15px">
+
+            <div class="col-lg-6 vx_form-control vx_form-control_complex">
+            </div>
+            <div class="col-lg-6 vx_form-control vx_form-control_complex">
+              <pagination-controls (pageChange)="p = $event" style="float: right"
+                                   directionLinks="true"
+                                   responsive="true"
+                                   previousLabel="Anterior"
+                                   nextLabel="Próximo"
+                                   screenReaderPaginationLabel="Paginação"
+                                   screenReaderPageLabel="página"
+                                   screenReaderCurrentLabel="Você está na página"></pagination-controls>
+            </div>
+          </div>
+        </div>
+        <div [hidden]="data.length > 0" class="col-lg-12 vx_form-control vx_form-control_complex" style="padding-bottom: 25px; padding-top: 25px">
+          Nenhum registro
+        </div>
+      </div>
+
+      <div class="content" *ngIf="tab === 'customers'" style="padding: 0px !important">
+        <div [hidden]="data.length == 0">
+          <div class="row" style="padding: 5px; padding-right: 15px">
+            <div class="col-lg-4 vx_form-control vx_form-control_complex">
+              <a style="cursor: pointer" class="red-text" (click)="deleteSelected('customers')" [hidden]="deleteSet.size == 0">({{deleteSet.size}}) Excluir selecionados</a>
+            </div>
+            <div class="col-lg-4 vx_form-control vx_form-control_complex">
+            </div>
+            <div class="col-lg-4 vx_form-control vx_form-control_complex" style="padding-right: 8px">
+              <input autocomplete="off" [(ngModel)]="filter" type="text" name="search" placeholder="Pesquisar" class="form-control input" style="width: calc(100% - 15px)" />
+              <span class="btn blue-search-btn" style="cursor: default">
+                <fa-icon [icon]="faSearch"></fa-icon>
+              </span>
+            </div>
+          </div>
+
+          <div class="row" style="overflow-x: scroll; margin-left: 0px; margin-right: 0px;margin-top: 25px">
+            <div class="col-lg-12 vx_form-control vx_form-control_complex" style="padding-left: 0px; padding-right: 0px">
+              <table id="myTable" class="myTable" style="border-left: 0px; border-right: 0px;">
+                <tr class="header">
+                  <th><input type="checkbox" (change)="selectAll($event)" /></th>
+                  <th>Code</th>
+                  <th>Nome</th>
+                  <th>Fone Principal</th>
+                  <th>Celular</th>
+                  <th>Endereço</th>
+                  <th>Número</th>
+                  <th>E-mail</th>
+                  <th style="width: 15%"></th>
+                </tr>
+                <tr *ngFor="let item of data | filter: filter | paginate: { itemsPerPage: 10, currentPage: p }; let i = index" style="width: 100%; cursor: pointer">
+                  <td>
+                    <input class="cbs" type="checkbox" (change)="changeCheckbox($event, item.id)" />
+                  </td>
+                  <td>
+                    {{item.code}}
+                  </td>
+                  <td>
+                    {{item.name}}
+                  </td>
+                  <td>
+                    {{item.phone}}
+                  </td>
+                  <td>
+                    {{item.cellphone}}
+                  </td>
+                  <td>
+                    {{item.addresses[0].address}}
+                  </td>
+                  <td>
+                    {{item.addresses[0].number}}
+                  </td>
+                  <td>
+                    {{item.email}}
+                  </td>
+                  <td>
+                    <button class="btn btn-secondary" (click)="openCustomers(item)">Atualizar</button>
+                  </td>
+                </tr>
+              </table>
+
+            </div>
+
+          </div>
+          <div class="row" style="padding: 5px; padding-right: 15px">
+
+            <div class="col-lg-6 vx_form-control vx_form-control_complex">
+            </div>
+            <div class="col-lg-6 vx_form-control vx_form-control_complex">
+              <pagination-controls (pageChange)="p = $event" style="float: right"
+                                   directionLinks="true"
+                                   responsive="true"
+                                   previousLabel="Anterior"
+                                   nextLabel="Próximo"
+                                   screenReaderPaginationLabel="Paginação"
+                                   screenReaderPageLabel="página"
+                                   screenReaderCurrentLabel="Você está na página"></pagination-controls>
+            </div>
+          </div>
+        </div>
+        <div [hidden]="data.length > 0" class="col-lg-12 vx_form-control vx_form-control_complex" style="padding-bottom: 25px; padding-top: 25px">
+          Nenhum registro
+        </div>
+      </div>
+
+        <ng-template #users let-modal>
+          <div class="modal-header">
+            <h4 class="modal-title" id="modal-basic-title">Usuários</h4>
+            <button type="button" class="close" aria-label="Close" (click)="closeModalButtonSelect()">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <form *ngIf="tab === 'users'" [formGroup]="usersForm" id="PageMainForm" class="signupAppContent" method="POST">
+              <div class="row">
+                <div class="col-lg-8 vx_form-control vx_form-control_complex">
+                  <label>Nome<span class="required-sign">*</span></label>
+                  <input required formControlName="name" type="text" class="form-control input" />
+                </div>
+                <div class="col-lg-4 vx_form-control vx_form-control_complex">
+                  <label>Apelido</label>
+                  <input formControlName="nickname" type="text" class="form-control input" />
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-lg-6 vx_form-control vx_form-control_complex">
+                  <label>E-mail<span class="required-sign">*</span></label>
+                  <input [attr.disabled]="isDisabled" required formControlName="email" type="email" class="form-control input" />
+                </div>
+                <div class="col-lg-6 vx_form-control vx_form-control_complex">
+                  <label>Tipo<span class="required-sign">*</span></label>
+                  <select required formControlName="type" type="text" placeholder="Tipo" class="form-control input required-select">
+                    <option value="null" disabled>Selecione um tipo</option>
+                    <option value="ADMIN">Admin</option>
+                    <option value="WAITER">Garçom</option>
+                    <option value="DELIVERYMAN">Entregador</option>
+                  </select>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-lg-6 vx_form-control vx_form-control_complex">
+                  <label>Senha<span class="required-sign">*</span></label>
+                  <input required formControlName="password" type="password" class="form-control input" />
+                </div>
+                <div class="col-lg-6 vx_form-control vx_form-control_complex">
+                  <label>Confirmar senha<span class="required-sign">*</span></label>
+                  <input required formControlName="confirmPassword" type="password" class="form-control input" />
+                </div>
+              </div>
+              <div class="row" [hidden]="passwordNotEquals == null || passwordNotEquals == ''">
+                <div class="col-lg-6 vx_form-control vx_form-control_complex">
+                  <div style="color: #f43e61">{{passwordNotEquals}}</div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-lg-6 vx_form-control vx_form-control_complex">
+
+                  <input formControlName="active" type="checkbox" />
+                  <label style="position: absolute; top: 5px; left: 35px">Ativo</label>
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="col-md-12">
+                  <button type="button" class="btn btn-light" (click)="collapsed = !collapsed">Permissões do usuário</button>
+                  <div [ngStyle]="{'display': collapsed ? 'none' : 'block'}" style="padding: 15px">
+                    <table id="myTable" class="myTable" style="border-left: 0px; border-right: 0px;">
+
+                      <tr class="header">
+                        <th>Funcionalidade</th>
+                        <th><input type="checkbox" style="vertical-align: middle" /> Editar</th>
+                        <th><input type="checkbox" style="vertical-align: middle" /> Visualizar</th>
+                        <th><input type="checkbox" style="vertical-align: middle" /> Excluir</th>
+                      </tr>
+                      <tr>
+                        <td>Resumo</td>
+                        <td></td>
+                        <td><input type="checkbox" /></td>
+                        <td></td>
+                      </tr>
+                      <tr>
+                        <td>Caixa</td>
+                        <td><input type="checkbox" /></td>
+                        <td><input type="checkbox" /></td>
+                        <td></td>
+                      </tr>
+                      <tr>
+                        <td>Pedidos</td>
+                        <td><input type="checkbox" /></td>
+                        <td><input type="checkbox" /></td>
+                        <td></td>
+                      </tr>
+                      <tr>
+                        <td>Pratos e Bebidas</td>
+                        <td><input type="checkbox" /></td>
+                        <td><input type="checkbox" /></td>
+                        <td><input type="checkbox" /></td>
+                      </tr>
+                      <tr>
+                        <td>Categorias</td>
+                        <td><input type="checkbox" /></td>
+                        <td><input type="checkbox" /></td>
+                        <td><input type="checkbox" /></td>
+                      </tr>
+                      <tr>
+                        <td>Mesas</td>
+                        <td><input type="checkbox" /></td>
+                        <td><input type="checkbox" /></td>
+                        <td><input type="checkbox" /></td>
+                      </tr>
+                      <tr>
+                        <td>Usuários</td>
+                        <td><input type="checkbox" /></td>
+                        <td><input type="checkbox" /></td>
+                        <td><input type="checkbox" /></td>
+                      </tr>
+                      <tr>
+                        <td>Fornecedores</td>
+                        <td><input type="checkbox" /></td>
+                        <td><input type="checkbox" /></td>
+                        <td><input type="checkbox" /></td>
+                      </tr>
+                      <tr>
+                        <td>Clientes</td>
+                        <td><input type="checkbox" /></td>
+                        <td><input type="checkbox" /></td>
+                        <td><input type="checkbox" /></td>
+                      </tr>
+                      <tr>
+                        <td>Contas à Pagar</td>
+                        <td><input type="checkbox" /></td>
+                        <td><input type="checkbox" /></td>
+                        <td><input type="checkbox" /></td>
+                      </tr>
+                      <tr>
+                        <td>Contas à Receber</td>
+                        <td><input type="checkbox" /></td>
+                        <td><input type="checkbox" /></td>
+                        <td><input type="checkbox" /></td>
+                      </tr>
+                      <tr>
+                        <td>Fluxo de Caixa</td>
+                        <td></td>
+                        <td><input type="checkbox" /></td>
+                        <td></td>
+                      </tr>
+                      <tr>
+                        <td>Controle de Débitos (fiado)</td>
+                        <td><input type="checkbox" /></td>
+                        <td><input type="checkbox" /></td>
+                        <td><input type="checkbox" /></td>
+                      </tr>
+                      <tr>
+                        <td>Estoque</td>
+                        <td><input type="checkbox" /></td>
+                        <td><input type="checkbox" /></td>
+                        <td><input type="checkbox" /></td>
+                      </tr>
+                      <tr>
+                        <td>Produtos</td>
+                        <td><input type="checkbox" /></td>
+                        <td><input type="checkbox" /></td>
+                        <td><input type="checkbox" /></td>
+                      </tr>
+                      <tr>
+                        <td>Estatísticas</td>
+                        <td></td>
+                        <td><input type="checkbox" /></td>
+                        <td></td>
+                      </tr>
+                      <tr>
+                        <td>Cardápio Online</td>
+                        <td><input type="checkbox" /></td>
+                        <td></td>
+                        <td></td>
+                      </tr>
+                      <tr>
+                        <td>Meu Plano</td>
+                        <td><input type="checkbox" /></td>
+                        <td></td>
+                        <td></td>
+                      </tr>
+                      <tr>
+                        <td>Configurações Conta</td>
+                        <td></td>
+                        <td></td>
+                        <td><input type="checkbox" /></td>
+                      </tr>
+
+                    </table>
+                    </div>
+
+                  </div>
+                </div>
+              <div class="row">
+                <div class="col-md-12">
+                  <button type="submit" (click)="saveUser(false)" class="btn btn-primary" style="float: right">Salvar</button>
+
+                </div>
+              </div>
+            </form>
+          </div>
+        </ng-template>
+
+        <ng-template #tables let-modal>
+          <div class="modal-header">
+            <h4 class="modal-title" id="modal-basic-title">Mesas</h4>
+            <button type="button" class="close" aria-label="Close" (click)="closeModalButtonSelect()">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <form *ngIf="tab === 'tables'" [formGroup]="tablesForm" id="PageMainForm" class="signupAppContent" method="POST">
+              <div class="row">
+                <div class="col-lg-6 vx_form-control vx_form-control_complex">
+                  <label>Código/Descrição<span class="required-sign">*</span></label>
+                  <input required formControlName="code" type="text" class="form-control input" />
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-12">
+                  <button type="submit" (click)="saveTable(false)" class="btn btn-primary" style="float: right">Salvar</button>
+
+                </div>
+              </div>
+            </form>
+          </div>
+        </ng-template>
+
+        <ng-template #itemCategories let-modal>
+          <div class="modal-header">
+            <h4 class="modal-title" id="modal-basic-title">Categorias</h4>
+            <button type="button" class="close" aria-label="Close" (click)="closeModalButtonSelect()">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <form *ngIf="tab === 'item-categories'" [formGroup]="itemCategoriesForm" id="PageMainForm" class="signupAppContent" method="POST">
+              <div class="row">
+                <div class="col-lg-4 vx_form-control vx_form-control_complex">
+                  <label>Código</label>
+                  <input readonly formControlName="code" type="text" class="form-control input" />
+                </div>
+                <div class="col-lg-8 vx_form-control vx_form-control_complex">
+                  <label>Nome<span class="required-sign">*</span></label>
+                  <input required formControlName="name" type="text" class="form-control input" />
+                </div>
+
+              </div>
+              <div class="row">
+                <div class="col-md-12">
+                  <button type="submit" (click)="saveItemCategory(false)" class="btn btn-primary" style="float: right">Salvar</button>
+
+                </div>
+              </div>
+            </form>
+          </div>
+        </ng-template>
+
+        <ng-template #foodsAndDrinks let-modal>
+          <div class="modal-header">
+            <h4 class="modal-title" id="modal-basic-title">Pratos e bebidas</h4>
+            <button type="button" class="close" aria-label="Close" (click)="closeModalButtonSelect()">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <form *ngIf="tab === 'items'" [formGroup]="itemsForm" id="PageMainForm" class="signupAppContent" method="POST">
+              <div class="row">
+                <div class="col-lg-4 vx_form-control vx_form-control_complex">
+                  <label>Código</label>
+                  <input readonly formControlName="code" type="text" class="form-control input" />
+                </div>
+                <div class="col-lg-8 vx_form-control vx_form-control_complex">
+                  <label>Nome<span class="required-sign">*</span></label>
+                  <input required formControlName="name" type="text" class="form-control input" />
+                </div>
+              </div>
+              <div class="row">
+
+                <div class="col-lg-6 vx_form-control vx_form-control_complex">
+                  <label>Tipo<span class="required-sign">*</span></label>
+                  <select required formControlName="foodType" class="form-control input required-select" placeholder="Selecione um tipo">
+                    <option value="null" [disabled]="true">Selecione um tipo</option>
+                    <option value="FOOD">Prato</option>
+                    <option value="DRINK">Bebida</option>
+                  </select>
+                </div>
+                <div class="col-lg-6 vx_form-control vx_form-control_complex">
+                  <label>Categoria<span class="required-sign">*</span></label>
+                  <div>
+                    <ng-autocomplete id="foodCategory" formControlName="foodCategory"
+                                     [(ngModel)]="itemCategorySelected"
+                                     placeHolder="Selecione uma categoria"
+                                     [data]="itemCategoryData"
+                                     [searchKeyword]="itemCategoryKeyword"
+                                     (selected)='itemCategorySelectEvent($event)'
+                                     [itemTemplate]="itemTemplate"
+                                     [notFoundTemplate]="notFoundTemplate">
+                    </ng-autocomplete>
+
+                    <ng-template #itemTemplate let-item>
+                      <a [innerHTML]="(item.code != undefined ? item.code : '') + (item.code && item.name != undefined ? ' - ' : '') + (item.name != undefined ? item.name : '')"></a>
+                    </ng-template>
+
+                    <ng-template #notFoundTemplate let-notFound>
+                      <div [innerHTML]="notFound"></div>
+                    </ng-template>
+                  </div>
+                </div>
+
+              </div>
+              <div class="row">
+                <div class="col-lg-6 vx_form-control vx_form-control_complex">
+                  <label>Preço<span class="required-sign">*</span></label>
+                  <input required [brmasker]="{money: true, thousand: '.',  decimalCaracter: ','}" formControlName="price" type="text" class="form-control input" />
+                </div>
+                <div class="col-lg-6 vx_form-control vx_form-control_complex">
+                  <label>Quantidade padrão</label>
+                  <div class="tooltip" style="color: #212529">
+                    <fa-icon [icon]="faInfoCircle"></fa-icon>
+                    <span class="tooltiptext">Quantidade padrão usada pelo garçom ao selecionar um item para pedido.</span>
+                  </div>
+                  <input required formControlName="defaultQuantity" type="number" min="1" class="form-control input" />
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-lg-6 vx_form-control vx_form-control_complex">
+                  <label>Foto <span style="font-size: 10pt">(tamanho recomendado: 175px x 175px)</span></label>
+                  <input type="file" (change)="fileChange($event)" />
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-lg-12 vx_form-control vx_form-control_complex">
+                  <label>Descrição</label>
+                  <textarea formControlName="bigDescription" class="form-control"></textarea>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-lg-6 vx_form-control vx_form-control_complex">
+                  <label>Ativo</label>
+                  <input formControlName="active" type="checkbox" checked="checked" style="vertical-align: middle; margin-left: 5px"/>
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="col-md-12">
+                  <button type="submit" (click)="saveItem(false)" class="btn btn-primary" style="float: right">Salvar</button>
+
+                </div>
+              </div>
+            </form>
+          </div>
+        </ng-template>
+
+        <ng-template #suppliers let-modal>
+          <div class="modal-header">
+            <h4 class="modal-title" id="modal-basic-title">Fornecedores</h4>
+            <button type="button" class="close" aria-label="Close" (click)="closeModalButtonSelect()">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <form *ngIf="tab === 'suppliers'" [formGroup]="suppliersForm" id="PageMainForm" class="signupAppContent" method="POST">
+              <div class="row">
+                <div class="col-lg-4 vx_form-control vx_form-control_complex">
+                  <label>Código</label>
+                  <input readonly formControlName="code" type="text" class="form-control input" />
+                </div>
+                <div class="col-lg-8 vx_form-control vx_form-control_complex">
+                  <label>Nome<span class="required-sign">*</span></label>
+                  <input required formControlName="name" type="text" class="form-control input" />
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-lg-8 vx_form-control vx_form-control_complex">
+                  <label>Endereço</label>
+                  <input formControlName="address" type="text" class="form-control input" />
+                </div>
+                <div class="col-lg-4 vx_form-control vx_form-control_complex">
+                  <label>CEP</label>
+                  <input formControlName="postalCode" type="text" class="form-control input" [brmasker]="{mask: '99999-99', len:9, type: 'num'}" />
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-lg-6 vx_form-control vx_form-control_complex">
+                  <label>Nome da pessoa para contato</label>
+                  <input formControlName="contactPersonName" type="text" class="form-control input" />
+                </div>
+                <div class="col-lg-6 vx_form-control vx_form-control_complex">
+                  <label>Celular ou telefone</label>
+                  <input formControlName="phone" [brmasker]="{phone: true}" type="text" class="form-control input" />
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-lg-6 vx_form-control vx_form-control_complex">
+                  <label>E-mail</label>
+                  <input formControlName="email" type="email" class="form-control input" />
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-12">
+                  <button type="submit" (click)="saveSupplier(false)" class="btn btn-primary" style="float: right">Salvar</button>
+
+                </div>
+              </div>
+            </form>
+          </div>
+        </ng-template>
+
+        <ng-template #customers let-modal>
+          <div class="modal-header">
+            <h4 class="modal-title" id="modal-basic-title">Clientes</h4>
+            <button type="button" class="close" aria-label="Close" (click)="closeModalButtonSelect()">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <div class="row">
+              <div class="col-lg-12 vx_form-control vx_form-control_complex">
+                <span style="margin-right: 10px"><b>Mostrar</b>:</span>
+                <span style="margin-right: 10px">
+                  <input [(ngModel)]="customersType" name="simple" type="radio" id="simple" value="simple" style="margin-right: 5px; height: unset !important">
+                  <label for="simple">Cadastro simples</label>
+                </span>
+                <span>
+                  <input [(ngModel)]="customersType" name="all" type="radio" id="all" value="all" style="margin-right: 5px; height: unset !important">
+                  <label for="all">Todos os campos</label>
+                </span>
+              </div>
+            </div>
+            <form id="PageMainForm" [formGroup]="customersForm" id="PageMainForm" class="signupAppContent" method="POST">
+
+              <div style=" border: 1px solid rgba(0, 0, 0, 0.2); border-radius: 2px; margin: 0px; margin-bottom: 15px;">
+                <div class="modal-header" style="margin-bottom: 10px; background-color: #f1f1f1"><b>Dados Principais</b></div>
+                <div style="padding: 15px">
+
+                  <div class="row">
+                    <div class="col-lg-4 vx_form-control vx_form-control_complex">
+                      <label>Código</label>
+                      <input readonly formControlName="code" type="text" class="form-control input" />
+                    </div>
+                    <div class="col-lg-8 vx_form-control vx_form-control_complex">
+                      <label>Nome<span class="required-sign">*</span></label>
+                      <input required type="text" formControlName="name" class="form-control input" />
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="col-lg-6 vx_form-control vx_form-control_complex">
+                      <label>E-mail</label>
+                      <input type="email" formControlName="email" class="form-control input" />
+                    </div>
+                    <div class="col-lg-6 vx_form-control vx_form-control_complex">
+                      <label>Data nasc.</label>
+                      <input formControlName="birthDate" type="date" class="form-control input" style="padding-top: 7px; padding-bottom: 7px" />
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="col-lg-6 vx_form-control vx_form-control_complex">
+                      <label>Fone principal</label>
+                      <input type="text" formControlName="phone" class="form-control input" [brmasker]="{phone: true}" />
+                    </div>
+                    <div class="col-lg-6 vx_form-control vx_form-control_complex">
+                      <label>Celular</label>
+                      <input type="text" formControlName="cellphone" class="form-control input" [brmasker]="{phone: true}" />
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="col-lg-6 vx_form-control vx_form-control_complex">
+                      <label>CPF ou CNPJ</label>
+                      <input type="text" formControlName="cPFOrCNPJ" [brmasker]="{person: true}" class="form-control input" />
+                    </div>
+                    <div class="col-lg-6 vx_form-control vx_form-control_complex">
+                      <label>RG ou IE</label>
+                      <input type="text" formControlName="rGOrIE" class="form-control input" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div style=" border: 1px solid rgba(0, 0, 0, 0.2); border-radius: 2px; margin: 0px; margin-bottom: 15px;">
+                <div class="modal-header" style="margin-bottom: 10px; background-color: #f1f1f1"><b>Endereço Principal</b></div>
+                <div style="padding: 15px">
+
+                  <div class="row">
+                    <div class="col-lg-4 vx_form-control vx_form-control_complex">
+                      <label>CEP</label>
+                      <input type="text" formControlName="postalCode" class="form-control input" [brmasker]="{mask:'00000-000', len:9, userCaracters: false}" />
+                      <!--<button class="btn blue-search-btn"><fa-icon [icon]="faSearch"></fa-icon></button>-->
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="col-lg-8 vx_form-control vx_form-control_complex">
+                      <label>Endereço</label>
+                      <input type="text" formControlName="address" class="form-control input" />
+                    </div>
+                    <div class="col-lg-4 vx_form-control vx_form-control_complex">
+                      <label>Número</label>
+                      <input type="text" formControlName="number" class="form-control input" style="padding-top: 7px; padding-bottom: 7px" />
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="col-lg-6 vx_form-control vx_form-control_complex">
+                      <label>Bairro</label>
+                      <input type="text" formControlName="district" class="form-control input" />
+                    </div>
+                    <div class="col-lg-6 vx_form-control vx_form-control_complex">
+                      <label>Complemento</label>
+                      <input type="text" formControlName="complement" class="form-control input" />
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="col-lg-6 vx_form-control vx_form-control_complex">
+                      <label>Cidade</label>
+                      <input type="text" formControlName="city" class="form-control input" />
+                    </div>
+                    <div class="col-lg-6 vx_form-control vx_form-control_complex">
+                      <label>Estado</label>
+                      <select formControlName="state" class="form-control input" placeholder="Selecione um estado">
+                        <option [ngValue]="null" [disabled]="true">Selecione um estado</option>
+                        <option value="AC">AC</option>
+                        <option value="AL">AL</option>
+                        <option value="AM">AM</option>
+                        <option value="AP">AP</option>
+                        <option value="BA">BA</option>
+                        <option value="CE">CE</option>
+                        <option value="DF">DF</option>
+                        <option value="ES">ES</option>
+                        <option value="GO">GO</option>
+                        <option value="MA">MA</option>
+                        <option value="MG">MG</option>
+                        <option value="MS">MS</option>
+                        <option value="MT">MT</option>
+                        <option value="PA">PA</option>
+                        <option value="PB">PB</option>
+                        <option value="PE">PE</option>
+                        <option value="PI">PI</option>
+                        <option value="PR">PR</option>
+                        <option value="RJ">RJ</option>
+                        <option value="RN">RN</option>
+                        <option value="RO">RO</option>
+                        <option value="RR">RR</option>
+                        <option value="RS">RS</option>
+                        <option value="SC">SC</option>
+                        <option value="SE">SE</option>
+                        <option value="SP">SP</option>
+                        <option value="PI">PI</option>
+                        <option value="PR">PR</option>
+                        <option value="RJ">RJ</option>
+                        <option value="TO">TO</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="col-lg-6 vx_form-control vx_form-control_complex">
+                      <label>Referência</label>
+                      <input type="text" formControlName="reference" class="form-control input" />
+                    </div>
+                    <!--<div class="col-lg-6 vx_form-control vx_form-control_complex">
+    <a href="#">Visualizar no mapa</a>
+  </div>
+      -->
+                  </div>
+                </div>
+              </div>
+              <div [hidden]="customersType != 'all'" style=" border: 1px solid rgba(0, 0, 0, 0.2); border-radius: 2px; margin: 0px; margin-bottom: 15px;">
+                <div class="modal-header" style="margin-bottom: 10px; background-color: #f1f1f1"><b>Outros Dados</b></div>
+                <div style="padding: 15px">
+                  <div class="row">
+                    <div class="col-lg-6 vx_form-control vx_form-control_complex">
+                      <label>Origem</label>
+                      <select formControlName="origin" class="form-control input">
+                        <option value="null" disabled selected>Selecione uma origem</option>
+                        <option value="UNDEFINED">Indefinido</option>
+                        <option value="FRIEND_INDICATION">Indicação de amigo</option>
+                        <option value="FACEBOOK">Facebook</option>
+                        <option value="GOOGLE">Google</option>
+                        <option value="INSTAGRAM">Instagram</option>
+                        <option value="RADIO">Rádio</option>
+                        <option value="MAGAZINE">Revista</option>
+                        <option value="OUTDOOR">Outdoor</option>
+                      </select>
+                    </div>
+                    <div class="col-lg-6 vx_form-control vx_form-control_complex">
+                      <label>Sexo</label>
+                      <select formControlName="gender" class="form-control input">
+                        <option value="null" disabled selected>Selecione o sexo</option>
+                        <option value="MASCULINE">Masculino</option>
+                        <option value="FEMININE">Feminino</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="col-lg-6 vx_form-control vx_form-control_complex">
+                      <label>Recados de telefone</label>
+                      <input type="text" formControlName="phoneScraps" class="form-control input" />
+                    </div>
+                    <div class="col-lg-6 vx_form-control vx_form-control_complex">
+                      <label>ICMS</label>
+                      <select formControlName="iCMS" class="form-control input">
+                        <option value="null" disabled selected>Selecione o ICMS</option>
+                        <option value="TAXPAYER">Contribuinte</option>
+                        <option value="CONTRIBUTOR_EXEMPT_FROM_REGISTRATION">Contribuinte isento de inscrição</option>
+                        <option value="NON_TAXPAYER">Não contribuinte</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div [hidden]="customersType != 'all'" style=" border: 1px solid rgba(0, 0, 0, 0.2); border-radius: 2px; margin: 0px; margin-bottom: 15px;">
+                <div class="modal-header" style="margin-bottom: 10px; background-color: #f1f1f1"><b>Conta Corrente</b></div>
+                <div style="padding: 15px">
+                  <div class="row">
+                    <div class="col-lg-6 vx_form-control vx_form-control_complex">
+                      <label>Saldo atual</label>
+                      <input type="text" formControlName="currentBalance" class="form-control input" [brmasker]="{money: true, thousand: '.',  decimalCaracter: ','}" />
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="col-lg-6 vx_form-control vx_form-control_complex">
+                      <label>Limite de crédito</label>
+                      <input type="text" formControlName="balanceLimit" class="form-control input" [brmasker]="{money: true, thousand: '.',  decimalCaracter: ','}" />
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="col-lg-12 vx_form-control vx_form-control_complex">
+                      <label>Bloquear fiado ao atingir o limite</label>
+                      <input type="checkbox" formControlName="blockDebtWhenReachingLimit" style="margin-left: 0px; margin-top: 5px; margin-right: 5px; float: left; height: unset !important" />
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="col-lg-12 vx_form-control vx_form-control_complex">
+                      <label>Arquivar - oculta em Conta Corrente e bloqueia para novos fiados</label>
+                      <input type="checkbox" formControlName="toFile" style="margin-left: 0px; margin-top: 5px; margin-right: 5px; float: left; height: unset !important" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-12">
+                  <button type="submit" (click)="saveCustomer(false)" class="btn btn-primary" style="float: right">Salvar</button>
+
+                </div>
+              </div>
+            </form>
+          </div>
+        </ng-template>
+
+    </div>
+  </div>
+</section>
+

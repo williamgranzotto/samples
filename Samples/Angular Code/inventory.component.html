@@ -1,0 +1,500 @@
+<style>
+   * {
+    box-sizing: border-box;
+  }
+
+  .myInput {
+    background-image: url('/css/searchicon.png');
+    background-position: 10px 10px;
+    background-repeat: no-repeat;
+    width: 100%;
+    border-radius: 5px;
+    padding: 12px 20px 12px 40px;
+    border: 1px solid #9da3a6;
+    margin-top: 70px;
+  }
+
+  .contents {
+    max-width: 936px
+  }
+
+  .content {
+    display: block;
+    background-color: white;
+    padding: 22px 22px;
+    border-radius: 3px;
+    margin-top: 22px;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+  }
+
+  .myTable {
+    border-collapse: collapse;
+    width: 200%;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+  }
+
+    .myTable th, .myTable td {
+      text-align: left;
+      padding: 12px;
+    }
+
+    .myTable tr {
+      border-bottom: 1px solid #ddd;
+    }
+
+      .myTable tr.header, .myTable tr:hover {
+        background-color: #f1f1f1;
+      }
+
+  .myTable2 {
+    border-collapse: collapse;
+    width: 100%;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+  }
+
+    .myTable2 th, .myTable2 td {
+      text-align: left;
+      padding: 12px;
+    }
+
+    .myTable2 tr {
+      border-bottom: 1px solid #ddd;
+    }
+
+      .myTable2 tr.header, .myTable tr:hover {
+        background-color: #f1f1f1;
+      }
+
+  .myTable .active {
+    background-color: #aaa;
+  }
+
+    .myTable .active:hover {
+      background-color: #aaa;
+    }
+
+  .navbar{
+    width: unset;
+  }
+
+  #moneyCounterForm .row{
+    margin-bottom: 5px
+  }
+
+  /* Change background color of buttons on hover */
+.tab button:hover {
+  background-color: #ddd;
+}
+
+/* Create an active/current tablink class */
+.tab button.active {
+  background-color: #ccc;
+}
+
+</style>
+
+<div class="content vx_text-body" *ngIf="tab === 'inventory'">
+  <div style="padding-top: 30px; background: rgb(245, 247, 250)">
+  <div class="navbar-container">
+    <div class="navbar">
+      <div class="subnav">
+        <button class="subnavbtn">Entrada <fa-icon style="margin-left: 8px" [icon]="faCaretDown"></fa-icon></button>
+        <div class="subnav-content" style="box-shadow: 0 0 4px 0 rgb(0 0 0 / 8%), 0 2px 4px 0 rgb(0 0 0 / 12%);background: #ffffff; color: #2c2e2f; border-radius: 0px">
+          <span (click)="populatePurchase(null, 'PURCHASE', purchase)" style="color: #2c2e2f;">Compra</span>
+          <!--<span style="color: #2c2e2f;">Transferência entre lojas</span>-->
+          <span (click)="populatePurchase(null, 'INVENTORY_ADJUSTMENT_ADD', purchase)" style="color: #2c2e2f;">Ajuste de estoque</span>
+          <span (click)="openStockEntryDialog()" style="color: #2c2e2f;">Entrada por CSV</span>
+          <!--<span style="color: #2c2e2f;">Outras entradas</span>-->
+        </div>
+      </div>
+      <div class="subnav">
+        <button class="subnavbtn">Saída <fa-icon style="margin-left: 8px" [icon]="faCaretDown"></fa-icon></button>
+        <div class="subnav-content" style="box-shadow: 0 0 4px 0 rgb(0 0 0 / 8%), 0 2px 4px 0 rgb(0 0 0 / 12%);background: #ffffff; color: #2c2e2f; border-radius: 0px; right: 1px">
+          <!--<span (click)="populatePurchase(null, 'RETURN_TO_SUPPLIER', purchase)" style="color: #2c2e2f;">Devolução ao fornecedor</span>-->
+          <!--<span style="color: #2c2e2f;">Transferência entre lojas</span>-->
+          <span (click)="populatePurchase(null, 'INVENTORY_ADJUSTMENT_REMOVE', purchase)" style="color: #2c2e2f;">Ajustes de estoque</span>
+          <span (click)="downloadStockFile()" style="color: #2c2e2f;">Saída por CSV</span>
+          <!--<span style="color: #2c2e2f;">Outras saídas</span>-->
+        </div>
+      </div>
+      <div class="subnav">
+        <button class="subnavbtn" (click)="populatePurchase(null, 'EDIT', purchase);">Editar</button>
+      </div>
+      <!--<div class="subnav">
+    <button class="subnavbtn">Cancelar</button>
+  </div>-->
+    </div>
+  </div>
+
+  <div class="tab" style="background: #ffffff; padding-top: 8px; border-bottom: 0px">
+    <div style="float: right">
+      <button [class]="!transactions? 'subnav active' : 'subnav'" (click)="openTab($event, 'products'); transactions = false" style="padding: 14px 16px; padding-top: 8px; cursor: pointer; text-decoration: none">Produtos</button>
+      <button [class]="transactions? 'subnav active' : 'subnav'" (click)="openTab($event, 'transactions'); transactions = true" style="padding: 14px 16px; padding-top: 8px; cursor: pointer; text-decoration: none">Transações</button>
+    </div>
+  </div>
+
+  <div id="products" class="tabcontent" style="margin-top: -1px; background: #ffffff">
+    <div [hidden]="productsData.length == 0">
+    <div class="row" style="padding: 5px; padding-right: 15px">
+      <div class="col-lg-4 vx_form-control vx_form-control_complex">
+      </div>
+      <div class="col-lg-4 vx_form-control vx_form-control_complex">
+      </div>
+      <div class="col-lg-4 vx_form-control vx_form-control_complex" style="padding-right: 8px">
+        <input autocomplete="off" [(ngModel)]="filter" type="text" name="search" placeholder="Pesquisar" class="form-control input" style="width: calc(100% - 15px)" />
+        <span class="btn blue-search-btn" style="cursor: default">
+          <fa-icon [icon]="faSearch"></fa-icon>
+        </span>
+      </div>
+    </div>
+    <div class="row" style="overflow-x: scroll; margin-left: 0px; margin-right: 0px;margin-top: 25px">
+      <div [hidden]="productsData.length == 0" class="col-lg-12 vx_form-control vx_form-control_complex" style="padding-left: 0px; padding-right: 0px;">
+
+        <table id="myTable" class="myTable">
+          <tr class="header">
+            <th>Descrição</th>
+            <th>Código</th>
+            <th>Marca</th>
+            <th>Categoria</th>
+            <th>Estoque atual</th>
+            <!--<th>Estoque reservado</th>-->
+            <!--<th>Estoque disponível</th>-->
+            <th>Estoque min.</th>
+            <th>Estoque max.</th>
+            <th>Último preço</th>
+            <th>Média de preços</th>
+            <th>Incluído em</th>
+            <th>Alterado em</th>
+            <th>Incluído/Alterado por</th>
+          </tr>
+          <tr style="width: 100%" *ngFor="let finishedProduct of productsData | filter: filter | paginate: { itemsPerPage: 10, currentPage: p }; let i = index">
+            <td>{{finishedProduct.name}}</td>
+            <td>{{finishedProduct.code}}</td>
+            <td>{{finishedProduct.productBrand != null ? finishedProduct.productBrand.name : ''}}</td>
+            <td>{{finishedProduct.productCategory != null ? finishedProduct.productCategory.name : ''}}</td>
+            <td>{{finishedProduct.currentInventoryAmount}}</td>
+            <td>{{finishedProduct.minInventoryAmount}}</td>
+            <td>{{finishedProduct.maxInventoryAmount}}</td>
+            <td>{{currencyService.formatNumber(finishedProduct.lastCostPrice)}}</td>
+            <td>{{currencyService.formatNumber(finishedProduct.averageCostPrice)}}</td>
+            <td>{{dateService.millisToDatetime(finishedProduct.includedOn)}}</td>
+            <td>{{finishedProduct.changedOn == null || finishedProduct.changedOn == '' ? '' : dateService.millisToDatetime(finishedProduct.changedOn)}}</td>
+            <td>{{finishedProduct.changedBy != null ? finishedProduct.changedBy.name : ''}}</td>
+          </tr>
+        </table>
+
+      </div>
+
+    </div>
+    <div class="row" style="padding: 5px; padding-right: 15px">
+
+      <div class="col-lg-6 vx_form-control vx_form-control_complex">
+      </div>
+      <div class="col-lg-6 vx_form-control vx_form-control_complex">
+        <pagination-controls (pageChange)="p = $event" style="float: right"
+                             directionLinks="true"
+                             responsive="true"
+                             previousLabel="Anterior"
+                             nextLabel="Próximo"
+                             screenReaderPaginationLabel="Paginação"
+                             screenReaderPageLabel="página"
+                             screenReaderCurrentLabel="Você está na página"></pagination-controls>
+      </div>
+    </div>
+  </div>
+  <div [hidden]="productsData.length > 0" class="col-lg-12 vx_form-control vx_form-control_complex" style="padding-bottom: 200px; padding-top: 25px; background: #ffffff">
+    Nenhum registro
+  </div>
+</div>
+  <div id="transactions" class="tabcontent" style="margin-top: -1px; background: #ffffff">
+    <div [hidden]="transactionsGroupData.length == 0">
+    <div class="row" style="padding: 5px; padding-right: 15px">
+      <div class="col-lg-4 vx_form-control vx_form-control_complex">
+      </div>
+      <div class="col-lg-4 vx_form-control vx_form-control_complex">
+      </div>
+      <div class="col-lg-4 vx_form-control vx_form-control_complex" style="padding-right: 8px">
+        <input autocomplete="off" [(ngModel)]="filter" type="text" name="search" placeholder="Pesquisar" class="form-control input" style="width: calc(100% - 15px)" />
+        <span class="btn blue-search-btn" style="cursor: default">
+          <fa-icon [icon]="faSearch"></fa-icon>
+        </span>
+      </div>
+    </div>
+    <div class="row" style="overflow-x: scroll; margin-left: 0px; margin-right: 0px;margin-top: 25px">
+      <div class="col-lg-12 vx_form-control vx_form-control_complex">
+
+        <table id="myTable" class="myTable">
+          <tr class="header">
+            <th>Tipo</th>
+            <th>Número</th>
+            <th>Data</th>
+            <th>Hora</th>
+            <th>Fornecedor</th>
+            <th>Funcionário</th>
+            <th>Itens</th>
+            <th>Subtotal</th>
+            <th>Desconto</th>
+            <th>Outras despesas</th>
+            <th>Frete</th>
+            <th>Total final</th>
+            <th>Valor pago</th>
+            <th>Meio pagamento</th>
+            <th>Troco</th>
+            <th>Observações</th>
+          </tr>
+          <tr [ngClass]="transactionsGroupActive[i]" (click)="setTransactionActive(i)" style="width: 100%; cursor: pointer" (dblclick)="populatePurchase(inventoryTransactionGroup, 'EDIT', purchase);" *ngFor="let inventoryTransactionGroup of transactionsGroupData | filter: filter | paginate: { itemsPerPage: 10, currentPage: p }; let i = index">
+            <td>{{translateService.translateStr(inventoryTransactionGroup.transactionType)}}</td>
+            <td></td>
+            <td>{{dateService.millisToDate(inventoryTransactionGroup.date)}}</td>
+            <td>{{dateService.millisToTime(inventoryTransactionGroup.date)}}</td>
+            <td>{{inventoryTransactionGroup.supplier.name}}</td>
+            <td>{{inventoryTransactionGroup.includedBy.name}}</td>
+            <td></td>
+            <td>{{currencyService.formatNumber(inventoryTransactionGroup.subtotal)}}</td>
+            <td>{{currencyService.formatNumber(inventoryTransactionGroup.discount)}}</td>
+            <td>{{currencyService.formatNumber(inventoryTransactionGroup.otherExpenses)}}</td>
+            <td>{{currencyService.formatNumber(inventoryTransactionGroup.freight)}}</td>
+            <td>{{currencyService.formatNumber(inventoryTransactionGroup.total)}}</td>
+            <td>{{currencyService.formatNumber(inventoryTransactionGroup.paidAmount)}}</td>
+            <td>{{currencyService.formatNumber(inventoryTransactionGroup.halfPayment)}}</td>
+            <td>{{currencyService.formatNumber(inventoryTransactionGroup.change)}}</td>
+            <td>{{inventoryTransactionGroup.observations}}</td>
+          </tr>
+        </table>
+        <pagination-controls (pageChange)="p = $event"></pagination-controls>
+      </div>
+    </div>
+    </div>
+    <div [hidden]="transactionsGroupData.length > 0" class="col-lg-12 vx_form-control vx_form-control_complex" style="padding-bottom: 200px; padding-top: 25px; background: #ffffff">
+      Nenhum registro
+    </div>
+  </div>
+
+    <ng-template #CSVStockEntry let-modal>
+      <div class="modal-header">
+        <h4 class="modal-title" id="modal-basic-title">Entrada por CSV</h4>
+        <button type="button" class="close" aria-label="Close" (click)="closeModalButtonSelect()">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form id="PageMainForm" class="signupAppContent" method="POST" [formGroup]="CSVStockEntryForm"
+              enctype="multipart/form-data">
+          <div style=" border: 1px solid rgba(0, 0, 0, 0.2); border-radius: 2px; margin: 0px; margin-bottom: 15px;">
+            <div style="padding: 15px">
+              <div class="row" style="margin-bottom: 25px">
+                <div class="col-lg-12 vx_form-control vx_form-control_complex">
+                  <label>Arquivo</label>
+                  <input type="file" (change)="fileChange($event)" style="border:0px !important" />
+
+                </div>
+
+              </div>
+              <div class="row" style="margin: 0px">
+
+                <button type="button" class="collapsible" (click)="collapsed = !collapsed">Valores separados por vírgula</button>
+                <div id="CSVStockEntryTip" [ngStyle]="{'display': collapsed ? 'none' : 'block'}" style="padding: 15px">
+                  <p>1) Código</p>
+                  <p>2) Código do produto</p>
+                  <p>3) Código da marca do produto</p>
+                  <p>4) Código da categoria do produto</p>
+                  <p>5) Quantidade atual (número decimal com ponto)</p>
+                  <p>6) Quantidade reservada (número decimal com ponto)</p>
+                  <p>7) Quantidade disponível (número decimal com ponto)</p>
+                  <p>8) Quantidade mínima (número decimal com ponto)</p>
+                  <p>9) Quantidade máxima (número decimal com ponto)</p>
+                  <p>10) Preço médio (número decimal com ponto)</p>
+                  <p>11) Data de inclusão (dd/MM/aaaa hh:mm)</p>
+                  <p>12) Data de modificação (dd/MM/aaaa hh:mm)</p>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+
+          <div class="row" style="margin-top: 25px">
+            <div class="col-lg-12 vx_form-control vx_form-control_complex">
+              <button class="btn btn-primary" style="float: right; margin-left: 15px"
+                      type="submit" (click)="uploadStock()">
+                Salvar
+              </button>
+
+            </div>
+          </div>
+
+        </form>
+      </div>
+    </ng-template>
+
+    <ng-template #purchase let-modal>
+      <div class="modal-header">
+        <h4 class="modal-title" id="modal-basic-title">{{transactionsTitle}}</h4>
+        <button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form [formGroup]="purchaseForm" id="PageMainForm" class="signupAppContent" method="POST">
+          <div class="form-group">
+            <div class="row">
+              <div class="col-lg-4">
+                <label>Data<span class="required-sign">*</span></label>
+                <input required formControlName="date" type="date" placeholder="Data" class="form-control">
+
+              </div>
+              <div class="col-lg-4 vx_form-control vx_form-control_complex">
+                <label>Fornecedor<span class="required-sign">*</span></label>
+                <div>
+                  <ng-autocomplete id="supplier" formControlName="supplier"
+                                   class="custom-autocomplete-container"
+                                   placeHolder="Procurar" [data]="suppliersData"
+                                   [searchKeyword]="supplierKeyword"
+                                   (selected)='supplierSelectEvent($event)'
+                                   [itemTemplate]="itemTemplate"
+                                   [notFoundTemplate]="notFoundTemplate">
+                  </ng-autocomplete>
+
+                  <ng-template #itemTemplate let-item>
+                    <a [innerHTML]="(item.code != undefined ? item.code : '') + (item.code && item.name != undefined ? ' - ' : '') + (item.name != undefined ? item.name : '')"></a>
+                  </ng-template>
+
+                  <ng-template #notFoundTemplate let-notFound>
+                    <div [innerHTML]="notFound"></div>
+                  </ng-template>
+                </div>
+              </div>
+
+            </div>
+            <div class="row">
+              <div class="col-lg-12 vx_form-control vx_form-control_complex" style="overflow-x: auto">
+                <!--<nav class="navbar">
+    <input class="form-control" type="text" name="search" [(ngModel)]="filter">
+  </nav>-->
+                <table class="myTable2">
+                  <tr class="header">
+                    <th style="width: 25%">Produto</th>
+                    <th>Validade</th>
+                    <th>Quantidade</th>
+                    <th>Custo</th>
+                    <th>Total</th>
+                    <th>Opções</th>
+                  </tr>
+                  <tr *ngFor="let inventoryTransaction of inventoryTransactions | filter: filter | paginate: { itemsPerPage: 10, currentPage: p };let i = index">
+                    <td>
+                      <div>
+                        <ng-autocomplete id="product{{i}}"
+                                         [initialValue]="productInputList[i]"
+                                         class="custom-autocomplete-container"
+                                         placeHolder="Procurar" [data]="productsData"
+                                         [searchKeyword]="itemKeyword"
+                                         (selected)='changeProduct($event, i)'
+                                         [itemTemplate]="itemTemplate"
+                                         [notFoundTemplate]="notFoundTemplate">
+                        </ng-autocomplete>
+
+                        <ng-template #itemTemplate let-item>
+                          <a [innerHTML]="(item.code != undefined ? item.code : '') + (item.code && item.name != undefined ? ' - ' : '') + (item.name != undefined ? item.name : '')"></a>
+                        </ng-template>
+
+                        <ng-template #notFoundTemplate let-notFound>
+                          <div [innerHTML]="notFound"></div>
+                        </ng-template>
+                      </div>
+                    </td>
+                    <td>
+                      <input id="validity{{i}}" [disabled]="isInventoryAdjustment()" (change)="changeInventoryData($event)" type="date" value="" class="form-control" />
+                    </td>
+                    <td>
+                      <input required id="quantity{{i}}" (change)="changeInventoryData($event)" type="number" value="" class="form-control input" />
+                    </td>
+                    <td>
+                      <input [disabled]="isInventoryAdjustment()" required id="cost{{i}}" [brmasker]="{money: true, thousand: '.',  decimalCaracter: ','}" (change)="changeInventoryData($event)" type="text" value="" class="form-control input" />
+                    </td>
+                    <td>
+                      <input id="total{{i}}" type="text" value="" class="form-control input" readonly [brmasker]="{money: true, thousand: '.',  decimalCaracter: ','}"/>
+                    </td>
+                    <td>
+                      <div class="row" [hidden]="isInventoryAdjustment()">
+                        <div class="col-lg-6">
+                          <a style="cursor: pointer" (click)="removeInventoryTransaction(i)">
+                            <fa-icon [icon]="faMinusCircle"></fa-icon>
+                          </a>
+                        </div>
+                        <div class="col-lg-6">
+                          <a style="cursor: pointer" [hidden]="i != inventoryTransactions.length - 1" (click)="addInventoryTransaction()">
+                            <fa-icon [icon]="faPlusCircle"></fa-icon>
+                          </a>
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                </table>
+                <pagination-controls (pageChange)="p = $event"></pagination-controls>
+              </div>
+            </div>
+            <div class="row" [hidden]="isInventoryAdjustment()">
+              <div class="col-lg-3 vx_form-control vx_form-control_complex">
+                <label>Subtotal</label>
+                <input [brmasker]="{money: true, thousand: '.',  decimalCaracter: ','}" formControlName="subtotal" type="text" class="form-control input" readonly>
+
+              </div>
+              <div class="col-lg-3 vx_form-control vx_form-control_complex">
+                <label>Desconto</label>
+                <input (change)="changeTotal($event)" [brmasker]="{money: true, thousand: '.',  decimalCaracter: ','}" formControlName="discount" type="text" class="form-control input">
+
+              </div>
+              <div class="col-lg-3 vx_form-control vx_form-control_complex">
+                <label>Outras despesas</label>
+                <input (change)="changeTotal($event)" [brmasker]="{money: true, thousand: '.',  decimalCaracter: ','}" formControlName="otherExpenses" type="text" class="form-control input">
+
+              </div>
+              <div class="col-lg-3 vx_form-control vx_form-control_complex">
+                <label>Frete</label>
+                <input (change)="changeTotal($event)" [brmasker]="{money: true, thousand: '.',  decimalCaracter: ','}" formControlName="freight" type="text" class="form-control input">
+
+              </div>
+            </div>
+            <div class="row" [hidden]="isInventoryAdjustment()">
+              <div class="col-lg-3 vx_form-control vx_form-control_complex">
+                <label>Total Final</label>
+                <input [brmasker]="{money: true, thousand: '.',  decimalCaracter: ','}" formControlName="total" type="text" class="form-control input" readonly>
+
+              </div>
+              <div class="col-lg-3 vx_form-control vx_form-control_complex">
+                <label>Valor Pago</label>
+                <input [brmasker]="{money: true, thousand: '.',  decimalCaracter: ','}" formControlName="paidAmount" type="text" class="form-control input">
+
+              </div>
+              <div class="col-lg-3 vx_form-control vx_form-control_complex">
+                <label>Meio Pagamento</label>
+                <input [brmasker]="{money: true, thousand: '.',  decimalCaracter: ','}" formControlName="halfPayment" type="text" class="form-control input">
+
+              </div>
+              <div class="col-lg-3 vx_form-control vx_form-control_complex">
+                <label>Troco</label>
+                <input [brmasker]="{money: true, thousand: '.',  decimalCaracter: ','}" formControlName="change" type="text" class="form-control input">
+
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-lg-12 vx_form-control vx_form-control_complex">
+                <label>Observação</label>
+                <textarea formControlName="observations" type="text" class="form-control input">
+</textarea>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" (click)="savePurchase(false);">Salvar</button>
+      </div>
+    </ng-template>
+
+
+  </div>
+  </div>
